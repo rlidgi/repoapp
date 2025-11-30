@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Trash2, ImageIcon, Sparkles, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/auth/AuthContext';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -21,10 +22,18 @@ import GeneratedImageCard from '@/components/generator/GeneratedImageCard';
 export default function Gallery() {
   const [filter, setFilter] = useState('all');
   const queryClient = useQueryClient();
+  const { user, plan } = useAuth();
 
   const { data: images, isLoading } = useQuery({
     queryKey: ['allImages'],
     queryFn: () => base44.entities.GeneratedImage.list('-created_date', 100),
+    enabled: !!user
+  });
+
+  const { data: myImages = [] } = useQuery({
+    queryKey: ['myImagesUsage', user?.id],
+    queryFn: () => user ? base44.entities.GeneratedImage.listByUser(user.id) : Promise.resolve([]),
+    enabled: !!user
   });
 
   const deleteMutation = useMutation({
@@ -39,6 +48,15 @@ export default function Gallery() {
     if (filter === 'all') return true;
     return img.mode === filter;
   }) || [];
+
+  const withinSameMonth = (d, ref = new Date()) => {
+    const dt = new Date(d);
+    return dt.getUTCFullYear() === ref.getUTCFullYear() &&
+      dt.getUTCMonth() === ref.getUTCMonth();
+  };
+  const monthlyUsed = myImages.filter(i => withinSameMonth(i.created_date)).length;
+  const monthlyLimit = plan === 'pro100' ? 100 : (plan === 'pro200' ? 200 : null);
+  const monthlyPct = monthlyLimit ? Math.min(100, Math.round((monthlyUsed / monthlyLimit) * 100)) : 0;
 
   const filterButtons = [
     { id: 'all', label: 'All', icon: ImageIcon },
@@ -62,22 +80,40 @@ export default function Gallery() {
             </p>
           </div>
 
-          {/* Filter Buttons */}
-          <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl">
-            {filterButtons.map(btn => (
-              <button
-                key={btn.id}
-                onClick={() => setFilter(btn.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  filter === btn.id
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <btn.icon className="w-4 h-4" />
-                {btn.label}
-              </button>
-            ))}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 md:gap-6 w-full md:w-auto">
+            {/* Usage Summary for paid plans */}
+            {user && monthlyLimit && (
+              <div className="bg-white rounded-2xl border border-slate-200 p-4 w-full md:w-72">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-slate-700">Monthly usage</span>
+                  <span className="text-sm text-slate-600">{monthlyUsed} / {monthlyLimit}</span>
+                </div>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-violet-600"
+                    style={{ width: `${monthlyPct}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Filter Buttons */}
+            <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl">
+              {filterButtons.map(btn => (
+                <button
+                  key={btn.id}
+                  onClick={() => setFilter(btn.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    filter === btn.id
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <btn.icon className="w-4 h-4" />
+                  {btn.label}
+                </button>
+              ))}
+            </div>
           </div>
         </motion.div>
 
@@ -131,7 +167,7 @@ export default function Gallery() {
                     <AlertDialogFooter>
                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => deleteMutation.mutate(image.id)}
+                        onClick={() => toast.error('Delete is not available in this demo')}
                         className="bg-red-600 hover:bg-red-700 rounded-xl"
                       >
                         Delete

@@ -1,22 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Sparkles, Images, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Toaster } from 'sonner';
+import { useAuth } from '@/auth/AuthContext';
+import LoginPromptModal from '@/auth/LoginPromptModal';
 
 export default function Layout({ children }) {
   const location = useLocation();
+  const { user, signOut } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const navItems = [
     { name: 'Home', icon: Plus, label: 'Create' },
     { name: 'Gallery', icon: Images, label: 'Gallery' },
+    { name: 'Pricing', icon: null, label: 'Pricing' },
   ];
 
   const isActive = (pageName) => {
     const pageUrl = createPageUrl(pageName);
     return location.pathname === pageUrl;
   };
+
+  useEffect(() => {
+    if (user && showLoginModal) {
+      setShowLoginModal(false);
+    }
+  }, [user, showLoginModal]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -25,7 +36,7 @@ export default function Layout({ children }) {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link 
+            <Link
               to={createPageUrl('Home')}
               className="flex items-center gap-3 group"
             >
@@ -38,23 +49,57 @@ export default function Layout({ children }) {
             </Link>
 
             {/* Navigation */}
-            <nav className="flex items-center gap-1">
-              {navItems.map(item => (
-                <Link
-                  key={item.name}
-                  to={createPageUrl(item.name)}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
-                    isActive(item.name)
-                      ? "bg-slate-100 text-slate-900"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                  )}
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span className="hidden sm:inline">{item.label}</span>
-                </Link>
-              ))}
-            </nav>
+            <div className="flex items-center gap-3">
+              <nav className="flex items-center gap-1">
+                {navItems.map(item => (
+                  <Link
+                    key={item.name}
+                    to={createPageUrl(item.name)}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                      isActive(item.name)
+                        ? "bg-slate-100 text-slate-900"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                    )}
+                  >
+                    {item.icon ? <item.icon className="w-4 h-4" /> : null}
+                    <span className="hidden sm:inline">{item.label}</span>
+                  </Link>
+                ))}
+              </nav>
+              <div className="flex items-center gap-3">
+                {user ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      {user.picture && (
+                        <img
+                          src={user.picture}
+                          alt={user.name || 'User'}
+                          className="w-8 h-8 rounded-full"
+                          referrerPolicy="no-referrer"
+                        />
+                      )}
+                      <span className="text-sm text-slate-700 max-w-[12rem] truncate">
+                        {user.name || user.email}
+                      </span>
+                    </div>
+                    <button
+                      onClick={signOut}
+                      className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                    >
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setShowLoginModal(true)}
+                    className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                  >
+                    Sign in
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -64,27 +109,14 @@ export default function Layout({ children }) {
         {children}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-100 bg-white mt-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-slate-500 text-sm">
-              <Sparkles className="w-4 h-4 text-violet-500" />
-              <span>Powered by AI</span>
-            </div>
-            <p className="text-slate-400 text-sm">
-              Generate beautiful, royalty-free images
-            </p>
-          </div>
-        </div>
-      </footer>
 
-      <Toaster 
-        position="bottom-right" 
+      <Toaster
+        position="bottom-right"
         toastOptions={{
           className: 'rounded-xl',
         }}
       />
+      <LoginPromptModal open={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </div>
   );
 }
