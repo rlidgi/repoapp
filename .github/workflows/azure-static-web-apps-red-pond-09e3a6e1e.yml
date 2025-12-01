@@ -22,6 +22,10 @@ jobs:
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
+        env:
+          VITE_STRIPE_LINK_PRO100: ${{ secrets.VITE_STRIPE_LINK_PRO100 }}
+          VITE_STRIPE_LINK_PRO200: ${{ secrets.VITE_STRIPE_LINK_PRO200 }}
+          VITE_PAYPAL_CLIENT_ID:   ${{ secrets.VITE_PAYPAL_CLIENT_ID }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_POND_09E3A6E1E }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
@@ -45,37 +49,5 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_POND_09E3A6E1E }}
           action: "close"
 
-
-name: Build and Deploy (SWA)
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  build_and_deploy_job:
-    runs-on: ubuntu-latest
-    env:
-      # Make env available to npm run build
-      VITE_STRIPE_LINK_PRO100: ${{ secrets.VITE_STRIPE_LINK_PRO100 }}
-      VITE_STRIPE_LINK_PRO200: ${{ secrets.VITE_STRIPE_LINK_PRO200 }}
-      VITE_PAYPAL_CLIENT_ID:   ${{ secrets.VITE_PAYPAL_CLIENT_ID }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Deploy
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          app_location: "/"
-          output_location: "dist"
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+ 
+          
