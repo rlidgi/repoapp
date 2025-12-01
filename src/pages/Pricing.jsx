@@ -76,25 +76,29 @@ export default function Pricing() {
                   </button>
                 ) : (
                   <div className="mt-6 space-y-3">
-                    {/* Stripe Payment Link (shown only if configured) */}
-                    <StripePaymentLinkButton planId={p.id} disabled={!user} />
-                    {/* PayPal Buttons (shown only if client ID configured) */}
-                    {paypalClientId ? (
-                      <PayPalButton
-                        amount={p.id === 'pro100' ? 10 : 15}
-                        disabled={!user}
-                        onSuccess={() => {
-                          setPlan(p.id);
-                          navigate(createPageUrl('Home'));
-                        }}
-                      />
-                    ) : null}
-                    {/* If neither payment method is configured, show a small note */}
-                    {!(paypalClientId) && !((p.id === 'pro100' ? link100 : link200)) ? (
-                      <div className="text-xs text-slate-500 border border-slate-200 rounded-md px-3 py-2">
-                        No payment methods configured for this plan.
-                      </div>
-                    ) : null}
+                    {(() => {
+                      const planStripeLink = p.id === 'pro100' ? link100 : link200;
+                      if (planStripeLink) {
+                        return <StripePaymentLinkButton planId={p.id} disabled={!user} />;
+                      }
+                      if (paypalClientId) {
+                        return (
+                          <PayPalButton
+                            amount={p.id === 'pro100' ? 10 : 15}
+                            disabled={!user}
+                            onSuccess={() => {
+                              setPlan(p.id);
+                              navigate(createPageUrl('Home'));
+                            }}
+                          />
+                        );
+                      }
+                      return (
+                        <div className="text-xs text-slate-500 border border-slate-200 rounded-md px-3 py-2">
+                          No payment methods configured for this plan.
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -111,7 +115,7 @@ function StripePaymentLinkButton({ planId, disabled }) {
   const link100 = import.meta.env.VITE_STRIPE_LINK_PRO100;
   const link200 = import.meta.env.VITE_STRIPE_LINK_PRO200;
   const href = planId === 'pro100' ? link100 : link200;
-  const label = planId === 'pro100' ? 'Pay with card (Stripe $10/mo)' : 'Pay with card (Stripe $15/mo)';
+  const label = 'Get Started';
   if (!href) return null;
   return (
     <a

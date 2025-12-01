@@ -1,0 +1,57 @@
+[1mdiff --git a/.github/workflows/azure-static-web-apps-red-pond-09e3a6e1e.yml b/.github/workflows/azure-static-web-apps-red-pond-09e3a6e1e.yml[m
+[1mindex d937efb..70400a4 100644[m
+[1m--- a/.github/workflows/azure-static-web-apps-red-pond-09e3a6e1e.yml[m
+[1m+++ b/.github/workflows/azure-static-web-apps-red-pond-09e3a6e1e.yml[m
+[36m@@ -22,6 +22,10 @@[m [mjobs:[m
+       - name: Build And Deploy[m
+         id: builddeploy[m
+         uses: Azure/static-web-apps-deploy@v1[m
+[32m+[m[32m        env:[m[41m[m
+[32m+[m[32m          VITE_STRIPE_LINK_PRO100: ${{ secrets.VITE_STRIPE_LINK_PRO100 }}[m[41m[m
+[32m+[m[32m          VITE_STRIPE_LINK_PRO200: ${{ secrets.VITE_STRIPE_LINK_PRO200 }}[m[41m[m
+[32m+[m[32m          VITE_PAYPAL_CLIENT_ID:   ${{ secrets.VITE_PAYPAL_CLIENT_ID }}[m[41m[m
+         with:[m
+           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_POND_09E3A6E1E }}[m
+           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)[m
+[36m@@ -45,37 +49,5 @@[m [mjobs:[m
+           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_POND_09E3A6E1E }}[m
+           action: "close"[m
+ [m
+[31m-[m
+[31m-name: Build and Deploy (SWA)[m
+[31m-on:[m
+[31m-  push:[m
+[31m-    branches: [ main ][m
+[31m-  workflow_dispatch:[m
+[31m-[m
+[31m-jobs:[m
+[31m-  build_and_deploy_job:[m
+[31m-    runs-on: ubuntu-latest[m
+[31m-    env:[m
+[31m-      # Make env available to npm run build[m
+[31m-      VITE_STRIPE_LINK_PRO100: ${{ secrets.VITE_STRIPE_LINK_PRO100 }}[m
+[31m-      VITE_STRIPE_LINK_PRO200: ${{ secrets.VITE_STRIPE_LINK_PRO200 }}[m
+[31m-      VITE_PAYPAL_CLIENT_ID:   ${{ secrets.VITE_PAYPAL_CLIENT_ID }}[m
+[31m-    steps:[m
+[31m-      - uses: actions/checkout@v4[m
+[31m-[m
+[31m-      - uses: actions/setup-node@v4[m
+[31m-        with:[m
+[31m-          node-version: 20[m
+[31m-[m
+[31m-      - name: Install[m
+[31m-        run: npm ci[m
+[31m-[m
+[31m-      - name: Build[m
+[31m-        run: npm run build[m
+[31m-[m
+[31m-      - name: Deploy[m
+[31m-        uses: Azure/static-web-apps-deploy@v1[m
+[31m-        with:[m
+[31m-          app_location: "/"[m
+[31m-          output_location: "dist"[m
+[31m-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}[m
+\ No newline at end of file[m
+[41m+ [m
+[41m+          [m
+\ No newline at end of file[m
