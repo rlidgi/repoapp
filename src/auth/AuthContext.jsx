@@ -3,6 +3,7 @@ import { auth } from './firebase';
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
   onAuthStateChanged,
   signOut as firebaseSignOut,
   signInWithEmailAndPassword,
@@ -11,6 +12,7 @@ import {
   sendPasswordResetEmail,
   sendEmailVerification,
 } from 'firebase/auth';
+import { toast } from 'sonner';
 
 const AuthContext = createContext(null);
 
@@ -52,7 +54,25 @@ export function AuthProvider({ children }) {
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    provider.setCustomParameters({ prompt: 'select_account' });
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (err) {
+      const code = err?.code || '';
+      if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
+        try {
+          await signInWithRedirect(auth, provider);
+          return;
+        } catch (redirectErr) {
+          const message = redirectErr?.message || 'Google sign-in failed (redirect)';
+          toast.error(message);
+          throw redirectErr;
+        }
+      }
+      const message = err?.message || 'Google sign-in failed';
+      toast.error(message);
+      throw err;
+    }
   };
 
   const signInWithEmail = async (email, password) => {
@@ -123,4 +143,5 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
+
 
