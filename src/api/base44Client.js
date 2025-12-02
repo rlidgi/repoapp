@@ -11,24 +11,33 @@ async function getIdTokenOrThrow() {
 
 async function authFetch(path, init = {}, retryOn401 = true) {
   const token = await getIdTokenOrThrow();
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      ...(init.headers || {}),
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (res.status === 401 && retryOn401) {
-    // Force refresh token and retry once
-    const fresh = await auth.currentUser.getIdToken(true);
-    const res2 = await fetch(`${API_BASE}${path}`, {
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
       ...init,
       headers: {
         ...(init.headers || {}),
-        Authorization: `Bearer ${fresh}`,
+        Authorization: `Bearer ${token}`,
       },
     });
-    return res2;
+  } catch {
+    throw new Error('Cannot reach the API server. Please ensure it is running.');
+  }
+  if (res.status === 401 && retryOn401) {
+    // Force refresh token and retry once
+    const fresh = await auth.currentUser.getIdToken(true);
+    try {
+      const res2 = await fetch(`${API_BASE}${path}`, {
+        ...init,
+        headers: {
+          ...(init.headers || {}),
+          Authorization: `Bearer ${fresh}`,
+        },
+      });
+      return res2;
+    } catch {
+      throw new Error('Cannot reach the API server. Please ensure it is running.');
+    }
   }
   return res;
 }
