@@ -14,7 +14,6 @@ import LoginPromptModal from '@/auth/LoginPromptModal';
 
 
 
-
 export default function Home() {
   const [mode, setMode] = useState('prompt');
   const [inputText, setInputText] = useState('');
