@@ -7,13 +7,27 @@ module.exports = async function (context, req) {
   try {
     const limit = Math.min(parseInt((req.query && req.query.limit) || '20', 10), 100);
     const uid = user.uid;
-    const snap = await db
-      .collection('images')
-      .where('user_id', '==', uid)
-      .orderBy('created_date', 'desc')
-      .limit(limit)
-      .get();
-    const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    let items = [];
+    try {
+      // Preferred: ordered by created_date desc (requires composite index)
+      const snap = await db
+        .collection('images')
+        .where('user_id', '==', uid)
+        .orderBy('created_date', 'desc')
+        .limit(limit)
+        .get();
+      items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    } catch (e) {
+      // Fallback: no orderBy -> avoids composite index requirement
+      const snap = await db
+        .collection('images')
+        .where('user_id', '==', uid)
+        .limit(limit)
+        .get();
+      items = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => String(b.created_date).localeCompare(String(a.created_date)));
+    }
     context.res = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items })
