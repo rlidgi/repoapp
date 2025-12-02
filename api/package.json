@@ -1,0 +1,15 @@
+{
+  "name": "imagen-app-functions",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "node-fetch": "^3.3.2"
+  }
+}
+
+

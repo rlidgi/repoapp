@@ -3,10 +3,19 @@ import { auth } from '@/auth/firebase';
 
 const RAW_API_BASE = import.meta.env.VITE_API_BASE_URL;
 const API_BASE = (() => {
-  const fallback = 'http://localhost:8787';
-  if (!RAW_API_BASE) return fallback;
+  // Development: default to local API server
+  if (import.meta.env.DEV && !RAW_API_BASE) {
+    return 'http://localhost:8787';
+  }
+  // Allow explicit same-origin modes
+  if (RAW_API_BASE && /^(same-origin|relative|\.|\/)$/i.test(RAW_API_BASE.trim())) {
+    return '';
+  }
+  // Production default: same-origin if not provided
+  if (!RAW_API_BASE) {
+    return '';
+  }
   const trimmed = RAW_API_BASE.replace(/\/+$/, '');
-  // If the value already includes protocol, use as-is; otherwise default to https://
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   return `https://${trimmed}`;
 })();
