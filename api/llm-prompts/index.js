@@ -8,12 +8,20 @@ module.exports = async function (context, req) {
     const body = req.body || {};
     const articleText = body.articleText;
     if (!articleText || typeof articleText !== 'string') {
-      context.res = { status: 400, jsonBody: { error: 'articleText required' } };
+      context.res = {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'articleText required' })
+      };
       return;
     }
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
     if (!OPENAI_API_KEY) {
-      context.res = { status: 500, jsonBody: { error: 'OpenAI key not configured' } };
+      context.res = {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'OpenAI key not configured' })
+      };
       return;
     }
     const sys =
@@ -33,7 +41,11 @@ module.exports = async function (context, req) {
     });
     if (!r.ok) {
       const txt = await r.text().catch(() => '');
-      context.res = { status: r.status, jsonBody: { error: `OpenAI error ${r.status}`, details: txt } };
+      context.res = {
+        status: r.status,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: `OpenAI error ${r.status}`, details: txt })
+      };
       return;
     }
     const data = await r.json();
@@ -49,7 +61,11 @@ module.exports = async function (context, req) {
     const prompts = Array.isArray(parsed?.prompts) ? parsed.prompts : [];
     context.res = { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompts }) };
   } catch (e) {
-    context.res = { status: 500, jsonBody: { error: 'LLM error', details: e.message } };
+    context.res = {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'LLM error', details: e.message })
+    };
   }
 };
 

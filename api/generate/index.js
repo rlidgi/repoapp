@@ -12,20 +12,32 @@ module.exports = async function (context, req) {
     const mode = body.mode || 'prompt';
     const article_excerpt = body.article_excerpt || null;
     if (!prompt || typeof prompt !== 'string') {
-      context.res = { status: 400, jsonBody: { error: 'prompt required' } };
+      context.res = {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'prompt required' })
+      };
       return;
     }
     const uid = user.uid;
     const plan = await getUserPlan(uid);
     const usage = await checkAndIncrementUsage(uid, plan);
     if (!usage.allowed) {
-      context.res = { status: 403, jsonBody: { error: 'quota_exceeded', limits: usage.limits } };
+      context.res = {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'quota_exceeded', limits: usage.limits })
+      };
       return;
     }
     const TOGETHER_API_KEY = process.env.TOGETHER_API_KEY || process.env.VITE_TOGETHER_API_KEY;
     const TOGETHER_IMAGE_MODEL = process.env.TOGETHER_IMAGE_MODEL || 'black-forest-labs/FLUX.1-schnell-Free';
     if (!TOGETHER_API_KEY) {
-      context.res = { status: 500, jsonBody: { error: 'Together key not configured' } };
+      context.res = {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Together key not configured' })
+      };
       return;
     }
     const r = await fetch('https://api.together.xyz/v1/images/generations', {
@@ -44,14 +56,22 @@ module.exports = async function (context, req) {
     });
     if (!r.ok) {
       const txt = await r.text().catch(() => '');
-      context.res = { status: r.status, jsonBody: { error: `Together error ${r.status}`, details: txt } };
+      context.res = {
+        status: r.status,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: `Together error ${r.status}`, details: txt })
+      };
       return;
     }
     const data = await r.json();
     const first = data?.data?.[0];
     const imageUrl = first?.url || first?.image_url || (Array.isArray(first?.output) ? first?.output?.[0]?.url : undefined);
     if (!imageUrl) {
-      context.res = { status: 502, jsonBody: { error: 'No image URL from model' } };
+      context.res = {
+        status: 502,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'No image URL from model' })
+      };
       return;
     }
     const doc = {
@@ -65,7 +85,11 @@ module.exports = async function (context, req) {
     const ref = await db.collection('images').add(doc);
     context.res = { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: ref.id, ...doc }) };
   } catch (e) {
-    context.res = { status: 500, jsonBody: { error: 'Generate error', details: e.message } };
+    context.res = {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Generate error', details: e.message })
+    };
   }
 };
 
