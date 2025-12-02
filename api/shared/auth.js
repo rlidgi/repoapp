@@ -1,8 +1,13 @@
 const { adminAuth } = require('./firebaseAdmin');
 
 async function requireAuth(ctx) {
-  const authHeader = ctx.req.headers['authorization'] || ctx.req.headers['Authorization'] || '';
-  const match = String(authHeader).match(/^Bearer\s+(.+)$/i);
+  const rawAuth =
+    ctx.req.headers['x-firebase-authorization'] ||
+    ctx.req.headers['X-Firebase-Authorization'] ||
+    ctx.req.headers['authorization'] ||
+    ctx.req.headers['Authorization'] ||
+    '';
+  const match = String(rawAuth).match(/^Bearer\s+(.+)$/i);
   if (!match) {
     ctx.res = { status: 401, jsonBody: { error: 'Missing token' } };
     return null;

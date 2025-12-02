@@ -33,6 +33,7 @@ async function authFetch(path, init = {}, retryOn401 = true) {
     headers: {
       ...(init.headers || {}),
       Authorization: `Bearer ${token}`,
+      'X-Firebase-Authorization': `Bearer ${token}`,
     },
   });
   if (res.status === 401 && retryOn401) {
@@ -43,6 +44,7 @@ async function authFetch(path, init = {}, retryOn401 = true) {
       headers: {
         ...(init.headers || {}),
         Authorization: `Bearer ${fresh}`,
+        'X-Firebase-Authorization': `Bearer ${fresh}`,
       },
     });
     return res2;
