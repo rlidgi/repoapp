@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "server": "node ./server/index.js",
-    "dev:full": "concurrently -k -n server,web -c blue,magenta \"npm:server\" \"npm:dev\""
+    "dev:full": "concurrently -k -n server,web -c blue,magenta \"npm:server\" \"npm:dev\"",
+    "sitemap:generate": "node ./scripts/generate-sitemap.mjs",
+    "postbuild": "node ./scripts/generate-sitemap.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.0.0",

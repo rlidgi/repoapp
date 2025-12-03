@@ -18,8 +18,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import GeneratedImageCard from '@/components/generator/GeneratedImageCard';
+import { useSEO } from '@/seo/useSEO';
 
 export default function Gallery() {
+  useSEO({
+    title: 'Gallery',
+    description: 'Browse and manage your AI-generated images in your personal gallery.'
+  });
   const [filter, setFilter] = useState('all');
   const queryClient = useQueryClient();
   const { user, plan } = useAuth();

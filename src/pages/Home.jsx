@@ -11,6 +11,7 @@ import { useAuth } from '@/auth/AuthContext';
 import { createPageUrl } from '@/utils';
 import { useNavigate } from 'react-router-dom';
 import LoginPromptModal from '@/auth/LoginPromptModal';
+import { useSEO } from '@/seo/useSEO';
 
 
 
@@ -18,6 +19,17 @@ import LoginPromptModal from '@/auth/LoginPromptModal';
 
 
 export default function Home() {
+  const siteUrl = import.meta.env.VITE_SITE_URL || (window.location && window.location.origin) || '';
+  useSEO({
+    title: 'Home',
+    description: 'Create stunning AI images free. Generate visuals from prompts or full articles.',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Piclumo',
+      url: siteUrl
+    }
+  });
   const [mode, setMode] = useState('prompt');
   const [inputText, setInputText] = useState('');
   const [generatedImages, setGeneratedImages] = useState([]);

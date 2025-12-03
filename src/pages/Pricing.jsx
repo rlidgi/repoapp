@@ -5,6 +5,7 @@ import LoginPromptModal from '@/auth/LoginPromptModal';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import PayPalButton from '@/payments/PayPalButton';
+import { useSEO } from '@/seo/useSEO';
 
 const plans = [
   { id: 'free', name: 'Free', price: '$0', monthlyLimit: 15, dailyLimit: 3, cta: 'Get started' },
@@ -13,6 +14,10 @@ const plans = [
 ];
 
 export default function Pricing() {
+  useSEO({
+    title: 'Pricing',
+    description: 'Choose the plan that fits your creative needs and upgrade anytime.'
+  });
   const { user, plan, setPlan } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const navigate = useNavigate();

@@ -3,8 +3,40 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Imagen App</title>
+  <title>Piclumo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Create stunning AI images free. Generate visuals from prompts or full articles with Piclumo." />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta property="og:site_name" content="Piclumo" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Piclumo — Create Stunning AI Images Free" />
+  <meta property="og:description"
+    content="Create stunning AI images free. Generate visuals from prompts or full articles with Piclumo." />
+  <meta property="og:url" content="" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Piclumo — Create Stunning AI Images Free" />
+  <meta name="twitter:description"
+    content="Create stunning AI images free. Generate visuals from prompts or full articles with Piclumo." />
+  <script>
+    (function () {
+      try {
+        var origin = (window && window.location && window.location.origin) ? window.location.origin : '';
+        var path = (window && window.location && window.location.pathname) ? window.location.pathname : '/';
+        var href = origin + path;
+        var canonical = document.querySelector('link[rel="canonical"]') || document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        canonical.setAttribute('href', href);
+        if (!canonical.parentNode) document.head.appendChild(canonical);
+        var ogUrl = document.querySelector('meta[property="og:url"]') || document.createElement('meta');
+        ogUrl.setAttribute('property', 'og:url');
+        ogUrl.setAttribute('content', href);
+        if (!ogUrl.parentNode) document.head.appendChild(ogUrl);
+      } catch (e) { }
+    })();
+  </script>
   <!-- Google tag (gtag.js) -->
   <script type="module">
     const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-PVYRQWZM19';
