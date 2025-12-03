@@ -138,8 +138,18 @@ export default function Layout({ children }) {
 				</div>
 			</div>
 			<div className="border-t border-slate-100">
-				<div className="max-w-7xl mx-auto px-6 py-4 text-xs text-slate-500">
-					© {new Date().getFullYear()} Piclumo. All rights reserved.
+				<div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between text-xs text-slate-500">
+					<span>© {new Date().getFullYear()} Piclumo. All rights reserved.</span>
+					<div className="flex items-center gap-4">
+						<a
+							href="https://www.facebook.com/profile.php?id=61584415657720"
+							target="_blank"
+							rel="noreferrer"
+							className="hover:text-slate-700"
+						>
+							Facebook
+						</a>
+					</div>
 				</div>
 			</div>
 		</footer>
