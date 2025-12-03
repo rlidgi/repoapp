@@ -183,7 +183,10 @@ export const base44 = {
           let msg = '';
           try {
             const err = await res.json();
-            msg = (err && (err.error || (err.details && `OpenAI: ${String(err.details).slice(0,200)}`))) || '';
+            // Prefer server-provided details (OpenAI message) over generic error label
+            const details = err && err.details ? String(err.details) : '';
+            const errorLabel = err && err.error ? String(err.error) : '';
+            msg = (details || errorLabel).slice(0, 300);
           } catch {}
           if (!msg) {
             msg = `Request failed (${res.status} ${res.statusText || ''})`.trim();

@@ -23,6 +23,19 @@ module.exports = async function (context, req) {
     if (OPENAI_KEY.toLowerCase().startsWith('bearer ')) {
       OPENAI_KEY = OPENAI_KEY.slice(7).trim();
     }
+    // Sanitize quotes, whitespace and invisible chars that can sneak in via portal copy/paste
+    const beforeSanitizeLen = OPENAI_KEY.length;
+    // Strip wrapping straight/directional quotes
+    OPENAI_KEY = OPENAI_KEY.replace(/^[\"'\u201C\u201D]+/, '').replace(/[\"'\u201C\u201D]+$/, '');
+    // Remove CR/LF and zero-width/invisible chars
+    OPENAI_KEY = OPENAI_KEY.replace(/[\r\n]/g, '').replace(/[\u200B-\u200D\uFEFF]/g, '');
+    // Remove any stray whitespace inside (keys should not contain spaces)
+    if (/\s/.test(OPENAI_KEY)) {
+      OPENAI_KEY = OPENAI_KEY.replace(/\s+/g, '');
+    }
+    if (beforeSanitizeLen !== OPENAI_KEY.length) {
+      try { context.log('[llm-prompts] OPENAI key sanitized (length adjusted)'); } catch (_) {}
+    }
     if (!OPENAI_KEY) {
       context.res = {
         status: 500,
