@@ -183,7 +183,7 @@ export const base44 = {
           let msg = '';
           try {
             const err = await res.json();
-            msg = err?.error || '';
+            msg = (err && (err.error || (err.details && `OpenAI: ${String(err.details).slice(0,200)}`))) || '';
           } catch {}
           if (!msg) {
             msg = `Request failed (${res.status} ${res.statusText || ''})`.trim();

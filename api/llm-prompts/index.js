@@ -41,7 +41,12 @@ module.exports = async function (context, req) {
     const userMsg = `Article:\n${articleText}\n\nProduce exactly 3 prompts. relevance should be one of: "high", "medium".`;
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${OPENAI_KEY}`, 'Content-Type': 'application/json' },
+      headers: {
+        'Authorization': `Bearer ${OPENAI_KEY}`,
+        'Content-Type': 'application/json',
+        ...(process.env.OPENAI_ORG_ID ? { 'OpenAI-Organization': process.env.OPENAI_ORG_ID } : {}),
+        ...(process.env.OPENAI_PROJECT_ID ? { 'OpenAI-Project': process.env.OPENAI_PROJECT_ID } : {}),
+      },
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
         messages: [{ role: 'system', content: sys }, { role: 'user', content: userMsg }],
