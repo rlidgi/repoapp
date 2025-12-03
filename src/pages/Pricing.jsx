@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, Shield, Lock, Zap } from 'lucide-react';
 import { useAuth } from '@/auth/AuthContext';
 import LoginPromptModal from '@/auth/LoginPromptModal';
 import { useNavigate } from 'react-router-dom';
@@ -53,6 +53,20 @@ export default function Pricing() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-slate-900">Choose your plan</h1>
           <p className="text-slate-600 mt-2">Start free. Upgrade when you need more.</p>
+          <div className="flex items-center justify-center gap-3 flex-wrap mt-6">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 bg-white">
+              <Shield className="w-4 h-4 text-emerald-600" />
+              <span className="text-sm">Secure payments</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 bg-white">
+              <Lock className="w-4 h-4 text-sky-600" />
+              <span className="text-sm">Private by default</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 bg-white">
+              <Zap className="w-4 h-4 text-violet-600" />
+              <span className="text-sm">Cancel anytime</span>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

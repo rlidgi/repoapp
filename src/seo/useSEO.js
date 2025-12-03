@@ -60,6 +60,10 @@ export function useSEO(config) {
 		const description =
 			config?.description ||
 			'Create stunning AI images free. Generate visuals from prompts or full articles with Piclumo.';
+		const imageUrl =
+			config?.image ||
+			(import.meta.env.VITE_OG_IMAGE_URL && String(import.meta.env.VITE_OG_IMAGE_URL)) ||
+			(siteUrl ? `${siteUrl}/logo.png` : '');
 
 		// Title
 		document.title = baseTitle;
@@ -76,13 +80,13 @@ export function useSEO(config) {
 		upsertMetaByProperty('og:title', baseTitle);
 		upsertMetaByProperty('og:description', description);
 		upsertMetaByProperty('og:url', fullUrl);
-		if (config?.image) upsertMetaByProperty('og:image', config.image);
+		if (imageUrl) upsertMetaByProperty('og:image', imageUrl);
 
 		// Twitter
 		upsertMetaByName('twitter:card', config?.twitterCard || 'summary_large_image');
 		upsertMetaByName('twitter:title', baseTitle);
 		upsertMetaByName('twitter:description', description);
-		if (config?.image) upsertMetaByName('twitter:image', config.image);
+		if (imageUrl) upsertMetaByName('twitter:image', imageUrl);
 
 		// JSON-LD
 		if (config?.jsonLd) {

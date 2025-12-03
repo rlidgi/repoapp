@@ -2,7 +2,7 @@
 import { auth } from '@/auth/firebase';
 
 const RAW_API_BASE = import.meta.env.VITE_API_BASE_URL;
-const API_BASE = (() => {
+export const API_BASE = (() => {
   // Development: default to local API server
   if (import.meta.env.DEV && !RAW_API_BASE) {
     return 'http://localhost:8787';
@@ -28,25 +28,89 @@ async function getIdTokenOrThrow() {
 
 async function authFetch(path, init = {}, retryOn401 = true) {
   const token = await getIdTokenOrThrow();
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
+  const baseHeaders = {
       ...(init.headers || {}),
       Authorization: `Bearer ${token}`,
       'X-Firebase-Authorization': `Bearer ${token}`,
-    },
-  });
+  };
+
+  const tryFetch = async (base, overrideHeaders) => {
+    return await fetch(`${base}${path}`, {
+      ...init,
+      headers: overrideHeaders || baseHeaders
+    });
+  };
+
+  let res = null;
+  try {
+    res = await tryFetch(API_BASE);
+  } catch (e) {
+    res = null;
+  }
+
+  // Fallback for preview/prod when API is on localhost:8787 and not proxied
+  if (!res || (res.status === 404 && API_BASE === '')) {
+    try {
+      const fallbackBase =
+        (typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost')
+          ? 'http://localhost:8787'
+          : (import.meta.env.VITE_API_BASE_FALLBACK || '');
+      if (fallbackBase) {
+        // eslint-disable-next-line no-console
+        console.warn('Falling back to API base:', fallbackBase);
+        res = await tryFetch(fallbackBase);
+      }
+    } catch {
+      // ignore; will surface later
+    }
+  }
+
+  // If response is OK but not JSON (likely HTML from SPA), try fallback to API
+  if (res && res.ok && API_BASE === '') {
+    const ct = (res.headers && res.headers.get && res.headers.get('content-type')) || '';
+    if (!/application\/json/i.test(ct)) {
+      try {
+        const fallbackBase =
+          (typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost')
+            ? 'http://localhost:8787'
+            : (import.meta.env.VITE_API_BASE_FALLBACK || '');
+        if (fallbackBase) {
+          // eslint-disable-next-line no-console
+          console.warn('Retrying with API fallback due to non-JSON response');
+          res = await tryFetch(fallbackBase);
+        }
+      } catch {
+        // keep original res
+      }
+    }
+  }
+
+  if (!res) {
+    throw new Error('Network error contacting API');
+  }
   if (res.status === 401 && retryOn401) {
     // Force refresh token and retry once
     const fresh = await auth.currentUser.getIdToken(true);
-    const res2 = await fetch(`${API_BASE}${path}`, {
-      ...init,
-      headers: {
+    const freshHeaders = {
         ...(init.headers || {}),
         Authorization: `Bearer ${fresh}`,
         'X-Firebase-Authorization': `Bearer ${fresh}`,
-      },
-    });
+    };
+    let res2 = null;
+    try {
+      res2 = await tryFetch(API_BASE, freshHeaders);
+    } catch {
+      res2 = null;
+    }
+    if (!res2 || (res2.status === 404 && API_BASE === '')) {
+      const fallbackBase =
+        (typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost')
+          ? 'http://localhost:8787'
+          : (import.meta.env.VITE_API_BASE_FALLBACK || '');
+      if (fallbackBase) {
+        res2 = await tryFetch(fallbackBase, freshHeaders);
+      }
+    }
     return res2;
   }
   return res;
@@ -57,7 +121,14 @@ export const base44 = {
     GeneratedImage: {
       async list(ordering = '-created_date', limit = 8) {
         const res = await authFetch(`/api/images?limit=${encodeURIComponent(limit)}`);
-        if (!res.ok) throw new Error('Failed to list images');
+        if (!res.ok) {
+          let details = '';
+          try {
+            details = await res.text();
+          } catch {}
+          const msg = `List images failed (${res.status})${details ? `: ${details}` : ''}`;
+          throw new Error(msg);
+        }
         const data = await res.json();
         const items = data.items || [];
         if (ordering === '-created_date') return items;

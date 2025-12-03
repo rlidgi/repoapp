@@ -9,9 +9,10 @@ import RecentImages from '@/components/generator/RecentImages';
 import GeneratedImageCard from '@/components/generator/GeneratedImageCard';
 import { useAuth } from '@/auth/AuthContext';
 import { createPageUrl } from '@/utils';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LoginPromptModal from '@/auth/LoginPromptModal';
 import { useSEO } from '@/seo/useSEO';
+import { Brush, Shield, ImageIcon } from 'lucide-react';
 
 
 
@@ -36,9 +37,10 @@ export default function Home() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { user, plan } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
 
-  const { data: recentImages, isLoading: loadingRecent } = useQuery({
+  const { data: recentImages, isLoading: loadingRecent, error: recentError } = useQuery({
     queryKey: ['recentImages'],
     queryFn: () => base44.entities.GeneratedImage.list('-created_date', 8),
     enabled: !!user
@@ -136,8 +138,24 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
     }
   }, [user, showLoginModal]);
 
+  // Accept prefill from navigation state (e.g., from Gallery history)
+  useEffect(() => {
+    const s = location?.state;
+    if (s && s.prefill) {
+      setInputText(s.prefill);
+      if (s.mode === 'article' || s.mode === 'prompt') {
+        setMode(s.mode);
+      }
+    }
+  }, [location?.state]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+      {/* Decorative background */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-24 -right-24 h-72 w-72 bg-violet-300/30 blur-3xl rounded-full" />
+        <div className="absolute top-40 -left-24 h-72 w-72 bg-fuchsia-300/20 blur-3xl rounded-full" />
+      </div>
       <div className="max-w-4xl mx-auto px-6 py-12 md:py-20">
         {/* Header */}
         <motion.div
@@ -157,6 +175,26 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
           </p>
         </motion.div>
 
+        {/* Hero visual */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.05 }}
+          className="mb-12"
+        >
+          <div className="relative rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-tr from-violet-50 via-white to-fuchsia-50" />
+            <div className="relative p-6 flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="Piclumo preview"
+                className="h-24 md:h-28 object-contain opacity-90"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </motion.div>
+
         {/* Mode Toggle */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -165,6 +203,36 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
           className="mb-8"
         >
           <ModeToggle mode={mode} setMode={setMode} />
+        </motion.div>
+
+        {/* Feature cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="grid gap-4 md:grid-cols-3 mb-10"
+        >
+          <div className="bg-white border border-slate-200 rounded-2xl p-4">
+            <div className="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center mb-3">
+              <Brush className="w-5 h-5" />
+            </div>
+            <h3 className="font-semibold text-slate-900 mb-1">Photorealistic results</h3>
+            <p className="text-sm text-slate-600">Clean, high-quality images generated from your prompts.</p>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-4">
+            <div className="w-10 h-10 rounded-xl bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center mb-3">
+              <ImageIcon className="w-5 h-5" />
+            </div>
+            <h3 className="font-semibold text-slate-900 mb-1">Article to visuals</h3>
+            <p className="text-sm text-slate-600">Paste an article and get multiple perfect illustrations.</p>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-4">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3">
+              <Shield className="w-5 h-5" />
+            </div>
+            <h3 className="font-semibold text-slate-900 mb-1">Private & secure</h3>
+            <p className="text-sm text-slate-600">Your creations stay yours with secure access controls.</p>
+          </div>
         </motion.div>
 
         {/* Input Area */}
@@ -223,7 +291,7 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
         </AnimatePresence>
 
         {/* Recent Images */}
-        <RecentImages images={recentImages} isLoading={loadingRecent} />
+        <RecentImages images={recentImages} isLoading={loadingRecent} error={recentError} />
       </div>
       <LoginPromptModal open={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </div>

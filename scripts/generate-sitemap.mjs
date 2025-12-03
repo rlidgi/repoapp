@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 
@@ -12,7 +13,7 @@ const siteUrl =
 	process.env.VITE_SITE_URL ||
 	'http://localhost:5173';
 
-const routes = ['/', '/gallery', '/pricing'];
+const routes = ['/', '/gallery', '/pricing', '/privacy', '/terms'];
 const today = new Date().toISOString().slice(0, 10);
 
 const urls = routes

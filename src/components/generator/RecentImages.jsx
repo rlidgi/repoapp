@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ImageIcon } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import GeneratedImageCard from './GeneratedImageCard';
+import { useAuth } from '@/auth/AuthContext';
 
-export default function RecentImages({ images, isLoading }) {
+export default function RecentImages({ images, isLoading, error }) {
+  const { user } = useAuth();
   if (isLoading) {
     return (
       <div className="mt-16">
@@ -20,6 +22,17 @@ export default function RecentImages({ images, isLoading }) {
     );
   }
 
+  if (error) {
+    return (
+      <div className="mt-16">
+        <div className="text-center py-16 px-8 bg-red-50 border border-red-100 rounded-3xl">
+          <h3 className="text-lg font-medium text-red-700 mb-2">Couldn’t load recent creations</h3>
+          <p className="text-red-600 text-sm break-all">{String(error.message || error)}</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!images || images.length === 0) {
     return (
       <div className="mt-16">
@@ -28,7 +41,11 @@ export default function RecentImages({ images, isLoading }) {
             <ImageIcon className="w-8 h-8 text-slate-400" />
           </div>
           <h3 className="text-lg font-medium text-slate-700 mb-2">No images yet</h3>
+          {user ? (
           <p className="text-slate-500 text-sm">Your generated images will appear here</p>
+          ) : (
+            <p className="text-slate-500 text-sm">Sign in to see your recent creations</p>
+          )}
         </div>
       </div>
     );

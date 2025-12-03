@@ -105,10 +105,44 @@ export default function Layout({ children }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:bg-white focus:text-slate-900 focus:px-3 focus:py-2 focus:rounded-lg focus:shadow focus:outline-none">Skip to content</a>
+      <main id="main" className="flex-1">
         {children}
       </main>
 
+		{/* Footer */}
+		<footer className="border-t border-slate-200 bg-white">
+			<div className="max-w-7xl mx-auto px-6 py-10 grid gap-8 md:grid-cols-3">
+				<div>
+					<div className="flex items-center gap-3 mb-3">
+						<div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+							<Sparkles className="w-4 h-4 text-white" />
+						</div>
+						<span className="text-base font-semibold text-slate-900">Piclumo</span>
+					</div>
+					<p className="text-sm text-slate-600">Create stunning AI images from prompts or full articles.</p>
+				</div>
+				<nav className="text-sm">
+					<div className="font-semibold text-slate-900 mb-3">Explore</div>
+					<ul className="space-y-2 text-slate-600">
+						<li><Link to={createPageUrl('Home')} className="hover:text-slate-900">Create</Link></li>
+						<li><Link to={createPageUrl('Gallery')} className="hover:text-slate-900">Gallery</Link></li>
+						<li><Link to={createPageUrl('Pricing')} className="hover:text-slate-900">Pricing</Link></li>
+						<li><Link to={createPageUrl('Privacy')} className="hover:text-slate-900">Privacy</Link></li>
+						<li><Link to={createPageUrl('Terms')} className="hover:text-slate-900">Terms</Link></li>
+					</ul>
+				</nav>
+				<div className="text-sm text-slate-600">
+					<div className="font-semibold text-slate-900 mb-3">Get started</div>
+					<p>It’s free to try. No credit card required.</p>
+				</div>
+			</div>
+			<div className="border-t border-slate-100">
+				<div className="max-w-7xl mx-auto px-6 py-4 text-xs text-slate-500">
+					© {new Date().getFullYear()} Piclumo. All rights reserved.
+				</div>
+			</div>
+		</footer>
 
       <Toaster
         position="bottom-right"
