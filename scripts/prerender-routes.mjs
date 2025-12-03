@@ -14,6 +14,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distDir = path.resolve(__dirname, '..', 'dist');
 
+// Skip prerender on CI/SWA environments where headless Chrome isn't available
+if (process.env.SWAPRERENDER_DISABLED === 'true' || process.env.GITHUB_ACTIONS === 'true') {
+	console.log('[prerender] Skipping prerender in CI environment');
+	process.exit(0);
+}
+
 if (!fs.existsSync(distDir)) {
 	console.error('dist/ not found. Run "npm run build" first.');
 	process.exit(1);
@@ -38,11 +44,18 @@ async function prerender() {
 	const baseUrl = `http://localhost:${port}`;
 
 	const server = await startStaticServer(port);
-	const puppeteer = await getPuppeteer();
-	const browser = await puppeteer.launch({
-		headless: 'new',
-		args: ['--no-sandbox', '--disable-setuid-sandbox']
-	});
+	let browser = null;
+	try {
+		const puppeteer = await getPuppeteer();
+		browser = await puppeteer.launch({
+			headless: 'new',
+			args: ['--no-sandbox', '--disable-setuid-sandbox']
+		});
+	} catch (e) {
+		console.warn('[prerender] Puppeteer launch failed, skipping prerender:', e?.message || e);
+		await new Promise((r) => server.close(r));
+		process.exit(0);
+	}
 
 	try {
 		const page = await browser.newPage();
