@@ -1,6 +1,6 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { requireAuth } = require('../shared/auth');
-const { db } = require('../shared/firebaseAdmin');
+const { db, storageBucket } = require('../shared/firebaseAdmin');
 const { getUserPlan, checkAndIncrementUsage } = require('../shared/usage');
 
 module.exports = async function (context, req) {
@@ -74,15 +74,67 @@ module.exports = async function (context, req) {
       };
       return;
     }
+
+    // Resolve potential short link to a final URL
+    async function resolveFinalUrl(url) {
+      try {
+        let rr = await fetch(url, { method: 'HEAD', redirect: 'follow' });
+        if (!rr.ok || !rr.url) {
+          rr = await fetch(url, { method: 'GET', redirect: 'follow' });
+        }
+        const ct = rr.headers.get('content-type') || '';
+        if (rr.ok && rr.url && /image\//i.test(ct)) return rr.url;
+        if (rr.ok && rr.url) return rr.url;
+      } catch {}
+      return url;
+    }
+    const resolvedUrl = await resolveFinalUrl(imageUrl);
+
+    // Pre-create doc id for stable storage path
+    const ref = db.collection('images').doc();
+    let finalImageUrl = resolvedUrl || imageUrl;
+    const sourceUrl = resolvedUrl || imageUrl;
+    try {
+      // Download and upload to Firebase Storage
+      const imgResp = await fetch(resolvedUrl, { method: 'GET', redirect: 'follow' });
+      if (!imgResp.ok) throw new Error(`fetch-final-image ${imgResp.status}`);
+      const contentType = imgResp.headers.get('content-type') || 'image/jpeg';
+      const ext =
+        contentType.includes('png') ? 'png' :
+        contentType.includes('jpeg') ? 'jpg' :
+        contentType.includes('jpg') ? 'jpg' :
+        contentType.includes('webp') ? 'webp' :
+        'jpg';
+      const buf = Buffer.from(await imgResp.arrayBuffer());
+      const filePath = `images/${uid}/${ref.id}.${ext}`;
+      const token = (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function')
+        ? globalThis.crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const file = storageBucket.file(filePath);
+      await file.save(buf, {
+        metadata: {
+          contentType,
+          cacheControl: 'public, max-age=31536000',
+          metadata: { firebaseStorageDownloadTokens: token },
+        }
+      });
+      finalImageUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket.name}/o/${encodeURIComponent(filePath)}?alt=media&token=${token}`;
+    } catch (e) {
+      // fall back to external URL
+      // eslint-disable-next-line no-console
+      console.error('Function storage archive failed, using external URL:', e?.message || e);
+    }
+
     const doc = {
       user_id: uid,
       prompt,
-      image_url: imageUrl,
+      image_url: finalImageUrl,
+      source_url: sourceUrl,
       mode,
       article_excerpt,
       created_date: new Date().toISOString(),
     };
-    const ref = await db.collection('images').add(doc);
+    await ref.set(doc);
     context.res = { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: ref.id, ...doc }) };
   } catch (e) {
     context.res = {

@@ -169,11 +169,12 @@ export default function Admin() {
             disabled={backfilling}
             className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-60"
           >
-            {backfilling ? 'Fixing…' : 'Fix Together links (scan 200)'}
+            {backfilling ? 'Fixing…' : 'Fix links & archive to storage (scan 200)'}
           </button>
           {backfillResult ? (
             <span className="text-xs text-slate-500">
-              Scanned {backfillResult.scanned} • Updated {backfillResult.updated}
+              Scanned {backfillResult.scanned} • Updated {backfillResult.updated}{' '}
+              {typeof backfillResult.archived === 'number' ? `• Archived ${backfillResult.archived}` : ''}
             </span>
           ) : null}
         </div>
