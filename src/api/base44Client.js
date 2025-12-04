@@ -271,6 +271,10 @@ export const base44 = {
       if (res.status === 404) {
         // Fallback to Azure Function
         res = await authFetch(`/api/admin-diagnostics`, { method: 'GET' });
+        if (res.status === 404) {
+          // Secondary fallback with alternate function name
+          res = await authFetch(`/api/diagnostics`, { method: 'GET' });
+        }
       }
       if (!res.ok) {
         let details = '';
