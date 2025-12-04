@@ -72,8 +72,8 @@ export default function GeneratedImageCard({ image, delay = 0 }) {
       ta.select();
       try { document.execCommand('copy'); } catch {}
       document.body.removeChild(ta);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
     }
   };
 

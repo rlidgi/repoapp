@@ -1,6 +1,3 @@
-// Azure Functions HTTP trigger for Termly-like LLM prompt generation via OpenAI Chat Completions API.
-// Mirrors server/routes/generate.js -> POST /api/llm/prompts
-
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { requireAuth } = require('../shared/auth');
 
@@ -18,25 +15,8 @@ module.exports = async function (context, req) {
       };
       return;
     }
-    let OPENAI_KEY = (process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || '').trim();
-    // Accept keys accidentally stored with "Bearer " prefix
-    if (OPENAI_KEY.toLowerCase().startsWith('bearer ')) {
-      OPENAI_KEY = OPENAI_KEY.slice(7).trim();
-    }
-    // Sanitize quotes, whitespace and invisible chars that can sneak in via portal copy/paste
-    const beforeSanitizeLen = OPENAI_KEY.length;
-    // Strip wrapping straight/directional quotes
-    OPENAI_KEY = OPENAI_KEY.replace(/^[\"'\u201C\u201D]+/, '').replace(/[\"'\u201C\u201D]+$/, '');
-    // Remove CR/LF and zero-width/invisible chars
-    OPENAI_KEY = OPENAI_KEY.replace(/[\r\n]/g, '').replace(/[\u200B-\u200D\uFEFF]/g, '');
-    // Remove any stray whitespace inside (keys should not contain spaces)
-    if (/\s/.test(OPENAI_KEY)) {
-      OPENAI_KEY = OPENAI_KEY.replace(/\s+/g, '');
-    }
-    if (beforeSanitizeLen !== OPENAI_KEY.length) {
-      try { context.log('[llm-prompts] OPENAI key sanitized (length adjusted)'); } catch (_) {}
-    }
-    if (!OPENAI_KEY) {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
+    if (!OPENAI_API_KEY) {
       context.res = {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -44,8 +24,6 @@ module.exports = async function (context, req) {
       };
       return;
     }
-    // Log only metadata, not the key itself
-    try { context.log('[llm-prompts] OPENAI key length:', OPENAI_KEY.length); } catch (_) {}
     const sys =
       'You are an expert prompt engineer for image generation models. ' +
       'Given an article, extract three distinct, highly descriptive, photorealistic image prompts suitable for professional publication. ' +
@@ -54,12 +32,7 @@ module.exports = async function (context, req) {
     const userMsg = `Article:\n${articleText}\n\nProduce exactly 3 prompts. relevance should be one of: "high", "medium".`;
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_KEY}`,
-        'Content-Type': 'application/json',
-        ...(process.env.OPENAI_ORG_ID ? { 'OpenAI-Organization': process.env.OPENAI_ORG_ID } : {}),
-        ...(process.env.OPENAI_PROJECT_ID ? { 'OpenAI-Project': process.env.OPENAI_PROJECT_ID } : {}),
-      },
+      headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
         messages: [{ role: 'system', content: sys }, { role: 'user', content: userMsg }],
@@ -68,7 +41,6 @@ module.exports = async function (context, req) {
     });
     if (!r.ok) {
       const txt = await r.text().catch(() => '');
-      try { context.log('[llm-prompts] OpenAI error', r.status, txt && txt.slice ? txt.slice(0, 200) : ''); } catch (_) {}
       context.res = {
         status: r.status,
         headers: { 'Content-Type': 'application/json' },
