@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Sparkles, Images, Plus } from 'lucide-react';
+import { Sparkles, Images, Plus, Facebook } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Toaster } from 'sonner';
 import { useAuth } from '@/auth/AuthContext';
@@ -30,7 +30,7 @@ export default function Layout({ children }) {
   }, [user, showLoginModal]);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col overflow-x-hidden">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6">
@@ -50,7 +50,7 @@ export default function Layout({ children }) {
 
             {/* Navigation */}
             <div className="flex items-center gap-3">
-              <nav className="flex items-center gap-1">
+              <nav className="flex items-center gap-1 overflow-x-auto sm:overflow-visible">
                 {navItems.map(item => (
                   <Link
                     key={item.name}
@@ -145,9 +145,10 @@ export default function Layout({ children }) {
 							href="https://www.facebook.com/profile.php?id=61584415657720"
 							target="_blank"
 							rel="noreferrer"
+							aria-label="Piclumo on Facebook"
 							className="hover:text-slate-700"
 						>
-							Facebook
+							<Facebook className="w-4 h-4" />
 						</a>
 					</div>
 				</div>

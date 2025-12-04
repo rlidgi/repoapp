@@ -38,7 +38,8 @@ export default function Terms() {
           </div>
         ) : (
           <div
-            className="prose prose-slate max-w-none"
+            className="prose prose-slate max-w-none break-words overflow-x-hidden"
+            style={{ wordBreak: 'break-word' }}
             dangerouslySetInnerHTML={{ __html: html }}
           />
         )}
