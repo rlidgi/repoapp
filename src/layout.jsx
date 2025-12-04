@@ -34,18 +34,18 @@ export default function Layout({ children }) {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-28">
             {/* Logo */}
             <Link
               to={createPageUrl('Home')}
               className="flex items-center gap-3 group"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20 group-hover:shadow-violet-500/40 transition-all duration-300">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-slate-900 tracking-tight hidden sm:block">
-				Piclumo
-              </span>
+              <img
+                src="/logo.png"
+                alt="Piclumo"
+                className="h-24 md:h-28 object-contain"
+                loading="lazy"
+              />
             </Link>
 
             {/* Navigation */}
@@ -115,9 +115,12 @@ export default function Layout({ children }) {
 			<div className="max-w-7xl mx-auto px-6 py-10 grid gap-8 md:grid-cols-3">
 				<div>
 					<div className="flex items-center gap-3 mb-3">
-						<div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
-							<Sparkles className="w-4 h-4 text-white" />
-						</div>
+						<img
+							src="/logo.png"
+							alt="Piclumo"
+							className="h-8 md:h-10 object-contain"
+							loading="lazy"
+						/>
 						<span className="text-base font-semibold text-slate-900">Piclumo</span>
 					</div>
 					<p className="text-sm text-slate-600">Create stunning AI images from prompts or full articles.</p>

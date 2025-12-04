@@ -15,6 +15,7 @@ import { useSEO } from '@/seo/useSEO';
 import { Brush, Shield, ImageIcon } from 'lucide-react';
 
 
+
 export default function Home() {
   const siteUrl = import.meta.env.VITE_SITE_URL || (window.location && window.location.origin) || '';
   useSEO({
@@ -171,25 +172,7 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
           </p>
         </motion.div>
 
-        {/* Hero visual */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.05 }}
-          className="mb-12"
-        >
-          <div className="relative rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-tr from-violet-50 via-white to-fuchsia-50" />
-            <div className="relative p-6 flex items-center justify-center">
-              <img
-                src="/logo.png"
-                alt="Piclumo preview"
-                className="h-24 md:h-28 object-contain opacity-90"
-                loading="lazy"
-              />
-            </div>
-          </div>
-        </motion.div>
+        {/* Hero visual removed per request to place logo above AI badge */}
 
         {/* Mode Toggle */}
         <motion.div
@@ -201,11 +184,29 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
           <ModeToggle mode={mode} setMode={setMode} />
         </motion.div>
 
-        {/* Feature cards */}
+
+
+        {/* Input Area */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8"
+        >
+          <PromptInput
+            value={inputText}
+            onChange={setInputText}
+            onGenerate={handleGenerate}
+            isLoading={generateMutation.isPending}
+            mode={mode}
+          />
+        </motion.div>
+
+        {/* Feature cards (below generate button) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
           className="grid gap-4 md:grid-cols-3 mb-10"
         >
           <div className="bg-white border border-slate-200 rounded-2xl p-4">
@@ -230,23 +231,6 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
             <p className="text-sm text-slate-600">Your creations stay yours with secure access controls.</p>
           </div>
         </motion.div>
-
-        {/* Input Area */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-8"
-        >
-          <PromptInput
-            value={inputText}
-            onChange={setInputText}
-            onGenerate={handleGenerate}
-            isLoading={generateMutation.isPending}
-            mode={mode}
-          />
-        </motion.div>
-
         {/* Mode Description */}
         <AnimatePresence mode="wait">
           <motion.div
