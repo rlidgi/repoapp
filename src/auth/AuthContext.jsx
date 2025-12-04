@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { auth } from './firebase';
+import { base44 } from '@/api/base44Client';
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -44,6 +45,11 @@ export function AuthProvider({ children }) {
         } catch {
           setPlanState('free');
         }
+        // Upsert user record (email + name) for metrics tracking
+        base44.users.upsert({ email: mapped.email, name: mapped.name }).catch((e) => {
+          // eslint-disable-next-line no-console
+          console.warn('User upsert failed:', e?.message || e);
+        });
       } else {
         setPlanState('free');
       }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Download, ExternalLink, Check, Copy, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -9,17 +9,53 @@ export default function GeneratedImageCard({ image, delay = 0 }) {
   const [copied, setCopied] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [displaySrc, setDisplaySrc] = useState(image.image_url);
+  const objectUrlRef = useRef(null);
 
-  const getProxyUrl = () => {
+  const getProxyUrls = () => {
     const base = API_BASE || '';
-    return `${base}/api/images/proxy?url=${encodeURIComponent(image.image_url)}`;
+    const urlParam = `url=${encodeURIComponent(image.image_url)}`;
+    return [
+      `${base}/api/images/proxy?${urlParam}`,   // Express path (dev)
+      `${base}/api/images-proxy?${urlParam}`,   // Azure Functions path (prod)
+    ];
+  };
+
+  const loadViaProxy = async () => {
+    try {
+      const current = auth.currentUser;
+      const token = current ? await current.getIdToken() : null;
+      const headers = token
+        ? {
+            Authorization: `Bearer ${token}`,
+            'X-Firebase-Authorization': `Bearer ${token}`,
+          }
+        : {};
+      const urls = getProxyUrls();
+      let res = await fetch(urls[0], { headers });
+      if (!res.ok) {
+        // try function route
+        res = await fetch(urls[1], { headers });
+      }
+      if (!res.ok) throw new Error('proxy fetch failed');
+      const blob = await res.blob();
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+      const obj = URL.createObjectURL(blob);
+      objectUrlRef.current = obj;
+      setDisplaySrc(obj);
+    } catch {
+      // keep original src; user can open in new window
+    }
   };
 
   const handleDownload = async () => {
     try {
       const current = auth.currentUser;
       const token = current ? await current.getIdToken() : null;
-      const res = await fetch(getProxyUrl(), {
+      const [devUrl, funcUrl] = getProxyUrls();
+      let res = await fetch(devUrl, {
         headers: token
           ? {
               Authorization: `Bearer ${token}`,
@@ -27,6 +63,16 @@ export default function GeneratedImageCard({ image, delay = 0 }) {
             }
           : {},
       });
+      if (!res.ok) {
+        res = await fetch(funcUrl, {
+          headers: token
+            ? {
+                Authorization: `Bearer ${token}`,
+                'X-Firebase-Authorization': `Bearer ${token}`,
+              }
+            : {},
+        });
+      }
       if (!res.ok) throw new Error('Download failed');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -101,6 +147,16 @@ export default function GeneratedImageCard({ image, delay = 0 }) {
     return () => document.removeEventListener('keydown', onKey);
   }, [isOpen]);
 
+  useEffect(() => {
+    // Cleanup any created object URL on unmount or when image changes
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
+    };
+  }, [image?.image_url]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -115,9 +171,16 @@ export default function GeneratedImageCard({ image, delay = 0 }) {
         aria-label="View image"
       >
         <img
-          src={image.image_url}
+          src={displaySrc}
           alt={image.prompt}
           loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={() => {
+            // Attempt to bypass hotlink protection via proxy
+            if (displaySrc === image.image_url) {
+              loadViaProxy();
+            }
+          }}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
       </button>
@@ -186,7 +249,7 @@ export default function GeneratedImageCard({ image, delay = 0 }) {
             <X className="w-6 h-6" />
           </button>
           <img
-            src={image.image_url}
+            src={displaySrc}
             alt={image.prompt}
             className="max-h-[85vh] max-w-[90vw] object-contain"
             onClick={(e) => e.stopPropagation()}

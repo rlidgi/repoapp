@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { requireAuth } from './auth.js';
 import { getUserPlan, checkAndIncrementUsage } from '../utils/usage.js';
-import { db } from '../firebaseAdmin.js';
+import { db, getStorageBucket } from '../firebaseAdmin.js';
 import express from 'express';
 
 export const generateRouter = express.Router();
@@ -87,16 +87,66 @@ generateRouter.post('/generate', requireAuth, async (req, res) => {
     const first = data?.data?.[0];
     const imageUrl = first?.url || first?.image_url || first?.output?.[0]?.url;
     if (!imageUrl) return res.status(502).json({ error: 'No image URL from model' });
+    // Attempt to resolve to a stable, final URL (short links may expire)
+    async function resolveFinalUrl(url) {
+      try {
+        // Prefer HEAD to avoid downloading content; fallback to GET if HEAD not allowed
+        let rr = await fetch(url, { method: 'HEAD', redirect: 'follow' });
+        if (!rr.ok || !rr.url) {
+          rr = await fetch(url, { method: 'GET', redirect: 'follow' });
+        }
+        const ct = rr.headers.get('content-type') || '';
+        if (rr.ok && rr.url && /image\//i.test(ct)) {
+          return rr.url;
+        }
+        // If content-type unknown but we have a redirected URL, still use it
+        if (rr.ok && rr.url) return rr.url;
+      } catch {}
+      return url;
+    }
+    const resolvedUrl = await resolveFinalUrl(imageUrl);
+    // Download the image and archive to Firebase Storage for permanence
+    const imgResp = await fetch(resolvedUrl, { method: 'GET', redirect: 'follow' });
+    if (!imgResp.ok) {
+      const txt = await imgResp.text().catch(() => '');
+      return res.status(502).json({ error: 'Failed to fetch final image', details: txt });
+    }
+    const contentType = imgResp.headers.get('content-type') || 'image/jpeg';
+    const extGuess =
+      contentType.includes('png') ? 'png' :
+      contentType.includes('jpeg') ? 'jpg' :
+      contentType.includes('jpg') ? 'jpg' :
+      contentType.includes('webp') ? 'webp' :
+      'jpg';
+    const arrayBuffer = await imgResp.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    // Pre-create doc id for pathing
+    const ref = db.collection('images').doc();
+    const filePath = `images/${uid}/${ref.id}.${extGuess}`;
+    const token = (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function')
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const bucket = getStorageBucket();
+    const file = bucket.file(filePath);
+    await file.save(buffer, {
+      metadata: {
+        contentType,
+        cacheControl: 'public, max-age=31536000',
+        metadata: { firebaseStorageDownloadTokens: token },
+      }
+    });
+    const storageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filePath)}?alt=media&token=${token}`;
     // Save image record
     const doc = {
       user_id: uid,
       prompt,
-      image_url: imageUrl,
+      image_url: storageUrl,
+      source_url: resolvedUrl || imageUrl,
       mode,
       article_excerpt: article_excerpt || null,
       created_date: new Date().toISOString(),
     };
-    const ref = await db.collection('images').add(doc);
+    await ref.set(doc);
     return res.json({ id: ref.id, ...doc });
   } catch (e) {
     return res.status(500).json({ error: 'Generate error', details: e.message });

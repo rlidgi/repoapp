@@ -4,6 +4,7 @@ const routes = {
   Pricing: '/pricing',
   Privacy: '/privacy',
   Terms: '/terms',
+  Admin: '/admin',
 };
 
 export function createPageUrl(pageName) {

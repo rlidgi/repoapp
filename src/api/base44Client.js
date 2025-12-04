@@ -194,4 +194,77 @@ export const base44 = {
       },
     },
   },
+  users: {
+    async upsert({ email, name }) {
+      let res = await authFetch(`/api/users/upsert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name })
+      });
+      if (res.status === 404) {
+        // Fallback to default function route name
+        res = await authFetch(`/api/users-upsert`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name })
+        });
+      }
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Upsert user failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    },
+    async stats() {
+      let res = await authFetch(`/api/users/stats`, {
+        method: 'GET'
+      });
+      if (res.status === 404) {
+        // Fallback to default function route name
+        res = await authFetch(`/api/users-stats`, { method: 'GET' });
+      }
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Get user stats failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    },
+    async list({ limit = 100 } = {}) {
+      let res = await authFetch(`/api/users/list?limit=${encodeURIComponent(limit)}`, {
+        method: 'GET'
+      });
+      if (res.status === 404) {
+        // Fallback to default function route name
+        res = await authFetch(`/api/users-list?limit=${encodeURIComponent(limit)}`, { method: 'GET' });
+      }
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`List users failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    }
+  }
+  ,
+  admin: {
+    async backfillResolve({ limit = 200, since } = {}) {
+      const qs = new URLSearchParams();
+      if (limit) qs.set('limit', String(limit));
+      if (since) qs.set('since', String(since));
+      // Try Express admin route first
+      let res = await authFetch(`/api/admin/images/backfill?${qs.toString()}`, { method: 'POST' });
+      if (res.status === 404) {
+        // Fallback to Azure Function
+        res = await authFetch(`/api/images-backfill?${qs.toString()}`, { method: 'POST' });
+      }
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Backfill failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    }
+  }
 };
