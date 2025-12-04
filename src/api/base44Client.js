@@ -256,8 +256,8 @@ export const base44 = {
       // Try Express admin route first
       let res = await authFetch(`/api/admin/images/backfill?${qs.toString()}`, { method: 'POST' });
       if (res.status === 404) {
-        // Fallback to Azure Function
-        res = await authFetch(`/api/images-backfill?${qs.toString()}`, { method: 'POST' });
+        // Fallback to Azure Function (correct route per function.json)
+        res = await authFetch(`/api/images/backfill?${qs.toString()}`, { method: 'POST' });
       }
       if (!res.ok) {
         let details = '';

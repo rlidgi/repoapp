@@ -16,7 +16,6 @@ import { Brush, Shield, ImageIcon } from 'lucide-react';
 
 
 
-
 export default function Home() {
   const siteUrl = import.meta.env.VITE_SITE_URL || (window.location && window.location.origin) || '';
   useSEO({

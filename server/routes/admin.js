@@ -45,23 +45,53 @@ adminRouter.post('/admin/images/backfill', requireAuth, requireOwner, async (req
 
     let scanned = 0;
     let updated = 0;
-    const batch = db.batch();
+    let archived = 0;
+    const bucket = getStorageBucket();
     for (const doc of snap.docs) {
       scanned++;
       const d = doc.data() || {};
       const url = d.image_url || '';
-      if (typeof url === 'string' && /together\.ai\/shrt/i.test(url)) {
-        const resolved = await resolveFinalUrl(url);
+      const isStorageUrl = /firebasestorage\.googleapis\.com/i.test(url);
+      if (isStorageUrl) continue;
+      const resolved = await resolveFinalUrl(url);
+      try {
+        const r = await fetch(resolved, { method: 'GET', redirect: 'follow' });
+        if (!r.ok) throw new Error(`fetch ${r.status}`);
+        const ct = r.headers.get('content-type') || 'image/jpeg';
+        const ext =
+          ct.includes('png') ? 'png' :
+          ct.includes('jpeg') ? 'jpg' :
+          ct.includes('jpg') ? 'jpg' :
+          ct.includes('webp') ? 'webp' :
+          'jpg';
+        const buf = Buffer.from(await r.arrayBuffer());
+        const uid = d.user_id || 'unknown';
+        const filePath = `images/${uid}/${doc.id}.${ext}`;
+        const token = (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function')
+          ? globalThis.crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const file = bucket.file(filePath);
+        await file.save(buf, {
+          metadata: {
+            contentType: ct,
+            cacheControl: 'public, max-age=31536000',
+            metadata: { firebaseStorageDownloadTokens: token },
+          }
+        });
+        const storageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filePath)}?alt=media&token=${token}`;
+        await doc.ref.set({
+          image_url: storageUrl,
+          source_url: d.source_url || resolved || url
+        }, { merge: true });
+        archived++;
+      } catch {
         if (resolved && resolved !== url) {
-          batch.update(doc.ref, { image_url: resolved });
+          await doc.ref.set({ image_url: resolved }, { merge: true });
           updated++;
         }
       }
     }
-    if (updated > 0) {
-      await batch.commit();
-    }
-    return res.json({ scanned, updated });
+    return res.json({ scanned, updated, archived });
   } catch (e) {
     return res.status(500).json({ error: 'backfill error', details: e.message });
   }
