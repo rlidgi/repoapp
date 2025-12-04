@@ -1,7 +1,8 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import { requireAuth } from './auth.js';
-import { db } from '../firebaseAdmin.js';
+import { db, getStorageBucket } from '../firebaseAdmin.js';
+import admin from 'firebase-admin';
 
 export const adminRouter = express.Router();
 
@@ -64,6 +65,47 @@ adminRouter.post('/admin/images/backfill', requireAuth, requireOwner, async (req
   } catch (e) {
     return res.status(500).json({ error: 'backfill error', details: e.message });
   }
+});
+
+// GET /api/admin/diagnostics - verify Firestore and Storage configuration
+adminRouter.get('/admin/diagnostics', requireAuth, requireOwner, async (req, res) => {
+  const result = {
+    projectId: null,
+    bucket: null,
+    firestoreOk: false,
+    storageOk: false,
+    errors: {},
+  };
+  try {
+    const app = admin.app();
+    // Try to derive project id
+    result.projectId =
+      app?.options?.projectId ||
+      process.env.FIREBASE_PROJECT_ID ||
+      process.env.GCLOUD_PROJECT ||
+      process.env.GCP_PROJECT ||
+      null;
+  } catch (e) {
+    result.errors.app = e?.message || String(e);
+  }
+  try {
+    const testRef = db.collection('_diag').doc('write-test');
+    await testRef.set({ ts: Date.now() }, { merge: true });
+    const snap = await testRef.get();
+    result.firestoreOk = snap.exists;
+  } catch (e) {
+    result.errors.firestore = e?.message || String(e);
+  }
+  try {
+    const bucket = getStorageBucket();
+    result.bucket = bucket?.name || null;
+    // Attempt a simple metadata call; if it throws, credentials or bucket is wrong
+    await bucket.getFiles({ maxResults: 1 });
+    result.storageOk = true;
+  } catch (e) {
+    result.errors.storage = e?.message || String(e);
+  }
+  return res.json(result);
 });
 
 

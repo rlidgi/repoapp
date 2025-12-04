@@ -18,6 +18,8 @@ export default function Admin() {
   const [syncing, setSyncing] = useState(false);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState(null);
+  const [diagLoading, setDiagLoading] = useState(false);
+  const [diagnostics, setDiagnostics] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,6 +101,21 @@ export default function Admin() {
     }
   }
 
+  async function handleDiagnostics() {
+    if (!user) return;
+    setDiagLoading(true);
+    setError('');
+    setDiagnostics(null);
+    try {
+      const r = await base44.admin.diagnostics();
+      setDiagnostics(r);
+    } catch (e) {
+      setError(e?.message || 'Diagnostics failed');
+    } finally {
+      setDiagLoading(false);
+    }
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
@@ -158,6 +175,24 @@ export default function Admin() {
             <span className="text-xs text-slate-500">
               Scanned {backfillResult.scanned} • Updated {backfillResult.updated}
             </span>
+          ) : null}
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-3">
+          <div className="font-semibold text-slate-900">Backend diagnostics</div>
+          <div className="text-xs text-slate-500">Verify Firestore/Storage connectivity.</div>
+          <button
+            type="button"
+            onClick={handleDiagnostics}
+            disabled={diagLoading}
+            className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          >
+            {diagLoading ? 'Checking…' : 'Check diagnostics'}
+          </button>
+          {diagnostics ? (
+            <pre className="text-xs bg-slate-50 border border-slate-200 rounded-lg p-3 overflow-x-auto">
+{JSON.stringify(diagnostics, null, 2)}
+            </pre>
           ) : null}
         </div>
 

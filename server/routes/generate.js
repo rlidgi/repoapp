@@ -105,43 +105,50 @@ generateRouter.post('/generate', requireAuth, async (req, res) => {
       return url;
     }
     const resolvedUrl = await resolveFinalUrl(imageUrl);
-    // Download the image and archive to Firebase Storage for permanence
-    const imgResp = await fetch(resolvedUrl, { method: 'GET', redirect: 'follow' });
-    if (!imgResp.ok) {
-      const txt = await imgResp.text().catch(() => '');
-      return res.status(502).json({ error: 'Failed to fetch final image', details: txt });
-    }
-    const contentType = imgResp.headers.get('content-type') || 'image/jpeg';
-    const extGuess =
-      contentType.includes('png') ? 'png' :
-      contentType.includes('jpeg') ? 'jpg' :
-      contentType.includes('jpg') ? 'jpg' :
-      contentType.includes('webp') ? 'webp' :
-      'jpg';
-    const arrayBuffer = await imgResp.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    // Pre-create doc id for pathing
-    const ref = db.collection('images').doc();
-    const filePath = `images/${uid}/${ref.id}.${extGuess}`;
-    const token = (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function')
-      ? globalThis.crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const bucket = getStorageBucket();
-    const file = bucket.file(filePath);
-    await file.save(buffer, {
-      metadata: {
-        contentType,
-        cacheControl: 'public, max-age=31536000',
-        metadata: { firebaseStorageDownloadTokens: token },
+    // Try to archive in Firebase Storage; fall back to resolved URL if storage not available
+    const ref = db.collection('images').doc(); // pre-generate id for consistent path
+    let finalImageUrl = resolvedUrl || imageUrl;
+    let sourceUrl = resolvedUrl || imageUrl;
+    try {
+      const imgResp = await fetch(resolvedUrl, { method: 'GET', redirect: 'follow' });
+      if (!imgResp.ok) {
+        const txt = await imgResp.text().catch(() => '');
+        throw new Error(`fetch-final-image ${imgResp.status}: ${txt?.slice(0, 200)}`);
       }
-    });
-    const storageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filePath)}?alt=media&token=${token}`;
+      const contentType = imgResp.headers.get('content-type') || 'image/jpeg';
+      const extGuess =
+        contentType.includes('png') ? 'png' :
+        contentType.includes('jpeg') ? 'jpg' :
+        contentType.includes('jpg') ? 'jpg' :
+        contentType.includes('webp') ? 'webp' :
+        'jpg';
+      const arrayBuffer = await imgResp.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const filePath = `images/${uid}/${ref.id}.${extGuess}`;
+      const token = (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function')
+        ? globalThis.crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const bucket = getStorageBucket();
+      const file = bucket.file(filePath);
+      await file.save(buffer, {
+        metadata: {
+          contentType,
+          cacheControl: 'public, max-age=31536000',
+          metadata: { firebaseStorageDownloadTokens: token },
+        }
+      });
+      finalImageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filePath)}?alt=media&token=${token}`;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Storage archive failed, falling back to external URL:', e?.message || e);
+      // Keep finalImageUrl as the resolved external URL
+    }
     // Save image record
     const doc = {
       user_id: uid,
       prompt,
-      image_url: storageUrl,
-      source_url: resolvedUrl || imageUrl,
+      image_url: finalImageUrl,
+      source_url: sourceUrl,
       mode,
       article_excerpt: article_excerpt || null,
       created_date: new Date().toISOString(),

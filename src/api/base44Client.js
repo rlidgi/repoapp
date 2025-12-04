@@ -265,6 +265,19 @@ export const base44 = {
         throw new Error(`Backfill failed (${res.status})${details ? `: ${details}` : ''}`);
       }
       return await res.json();
+    },
+    async diagnostics() {
+      let res = await authFetch(`/api/admin/diagnostics`, { method: 'GET' });
+      if (res.status === 404) {
+        // Fallback to Azure Function
+        res = await authFetch(`/api/admin-diagnostics`, { method: 'GET' });
+      }
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Diagnostics failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
     }
   }
 };
