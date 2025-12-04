@@ -23,12 +23,21 @@ export default function PromptInput({ value, onChange, onGenerate, isLoading, mo
     [mode]
   );
 
-  const textareaRef = useRef(null);
+  const textarea = useRef(null);
+  const didMountRef = useRef(false);
   const [history, setHistory] = useState([]);
 
+  // Only focus when user changes mode, but avoid scrolling on initial mount
   useEffect(() => {
-    // Focus textarea when mode changes for faster input
-    if (textareaRef.current) textareaRef.current.focus();
+    if (didMountRef.current && textarea.current) {
+      try {
+        textarea.current.focus({ preventScroll: true });
+      } catch {
+        // no-op
+      }
+    } else {
+      didMountRef.current = true;
+    }
   }, [mode]);
 
   // Load history for current mode
@@ -80,7 +89,7 @@ export default function PromptInput({ value, onChange, onGenerate, isLoading, mo
     <div className="space-y-4">
       <div className="relative group">
         <Textarea
-          ref={textareaRef}
+          ref={textarea}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholders[mode]}

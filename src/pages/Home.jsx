@@ -150,9 +150,9 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
   }, [location?.state]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
-      {/* Decorative background */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
+    <div className="relative min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 overflow-x-hidden">
+      {/* Decorative background (clipped to container to avoid horizontal overflow) */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-24 -right-24 h-72 w-72 bg-violet-300/30 blur-3xl rounded-full" />
         <div className="absolute top-40 -left-24 h-72 w-72 bg-fuchsia-300/20 blur-3xl rounded-full" />
       </div>

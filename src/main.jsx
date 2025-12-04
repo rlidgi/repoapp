@@ -11,6 +11,7 @@ import { AuthProvider } from './auth/AuthContext';
 
 
 
+
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
