@@ -67,7 +67,7 @@ async function prerender() {
 			await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
 			// Allow client hooks (SEO) to update head tags
-			await page.waitForTimeout(500);
+			await new Promise((r) => setTimeout(r, 500));
 
 			const html = await page.evaluate(() => document.documentElement.outerHTML);
 
