@@ -154,6 +154,27 @@ generateRouter.post('/generate', requireAuth, async (req, res) => {
       created_date: new Date().toISOString(),
     };
     await ref.set(doc);
+    // Register in gallery index (id normalized)
+    try {
+      const rawId = `generated:${ref.id}`;
+      const nid = (() => {
+        try { return Buffer.from(String(rawId)).toString('base64url'); }
+        catch { return Buffer.from(String(rawId)).toString('base64').replace(/[+/=]/g, '_'); }
+      })();
+      await db.collection('gallery').doc(nid).set({
+        id: rawId,
+        nid,
+        image_url: finalImageUrl,
+        prompt: prompt || null,
+        votes: 0,
+        rand: Math.random(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, { merge: true });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to register gallery entry:', e?.message || e);
+    }
     return res.json({ id: ref.id, ...doc });
   } catch (e) {
     return res.status(500).json({ error: 'Generate error', details: e.message });

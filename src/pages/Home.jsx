@@ -13,6 +13,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import LoginPromptModal from '@/auth/LoginPromptModal';
 import { useSEO } from '@/seo/useSEO';
 import { Brush, Shield, ImageIcon } from 'lucide-react';
+import TopGallery from '@/components/gallery/TopGallery';
+import BottomCarousel from '@/components/gallery/BottomCarousel';
 
 
 
@@ -99,6 +101,10 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
       setGeneratedImages(images);
       queryClient.invalidateQueries({ queryKey: ['recentImages'] });
       toast.success(mode === 'article' ? 'Images generated from your article!' : 'Image created successfully!');
+      // Trigger community gallery refresh
+      try {
+        window.dispatchEvent(new CustomEvent('gallery:refresh'));
+      } catch { }
     },
     onError: (err) => {
       console.error(err);
@@ -250,6 +256,9 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
           </motion.div>
         </AnimatePresence>
 
+        {/* Community Top Gallery */}
+        <TopGallery />
+
         {/* Generated Images */}
         <AnimatePresence>
           {generatedImages.length > 0 && (
@@ -274,6 +283,8 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
         <RecentImages images={recentImages} isLoading={loadingRecent} error={recentError} />
       </div>
       <LoginPromptModal open={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      {/* Bottom auto-scrolling carousel */}
+      <BottomCarousel />
     </div>
   );
 }

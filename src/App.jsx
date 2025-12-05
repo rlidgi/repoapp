@@ -7,6 +7,7 @@ import Pricing from './pages/Pricing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Admin from './pages/Admin';
+import GalleryViewer from './pages/GalleryViewer';
 import { createPageUrl } from '@/utils';
 import ScrollToTop from './ScrollToTop';
 
@@ -18,6 +19,7 @@ export default function App() {
         <Routes>
           <Route path={createPageUrl('Home')} element={<Home />} />
           <Route path={createPageUrl('Gallery')} element={<Gallery />} />
+          <Route path="/gallery/viewer" element={<GalleryViewer />} />
           <Route path={createPageUrl('Pricing')} element={<Pricing />} />
           <Route path={createPageUrl('Privacy')} element={<Privacy />} />
           <Route path={createPageUrl('Terms')} element={<Terms />} />

@@ -6,6 +6,7 @@ import { imagesRouter } from './routes/images.js';
 import { webhooksRouter } from './routes/webhooks.js';
 import { usersRouter } from './routes/users.js';
 import { adminRouter } from './routes/admin.js';
+import { galleryRouter } from './routes/gallery.js';
 
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
@@ -17,6 +18,7 @@ app.use('/api', imagesRouter);
 app.use('/webhooks', webhooksRouter);
 app.use('/api', usersRouter);
 app.use('/api', adminRouter);
+app.use('/api', galleryRouter);
 
 const port = process.env.PORT || 8787;
 app.listen(port, () => {

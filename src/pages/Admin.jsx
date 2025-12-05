@@ -20,6 +20,14 @@ export default function Admin() {
   const [backfillResult, setBackfillResult] = useState(null);
   const [diagLoading, setDiagLoading] = useState(false);
   const [diagnostics, setDiagnostics] = useState(null);
+  const [galleryBackfilling, setGalleryBackfilling] = useState(false);
+  const [galleryBackfillResult, setGalleryBackfillResult] = useState(null);
+  const [seeding, setSeeding] = useState(false);
+  const [seedResult, setSeedResult] = useState(null);
+  const [deleteSrc, setDeleteSrc] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [assigningRand, setAssigningRand] = useState(false);
+  const [assignResult, setAssignResult] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,6 +124,80 @@ export default function Admin() {
     }
   }
 
+  async function handleGalleryBackfill() {
+    if (!user) return;
+    setGalleryBackfilling(true);
+    setError('');
+    setGalleryBackfillResult(null);
+    try {
+      const r = await base44.galleryAdmin.backfill({ limit: 200 });
+      setGalleryBackfillResult(r);
+    } catch (e) {
+      setError(e?.message || 'Gallery backfill failed');
+    } finally {
+      setGalleryBackfilling(false);
+    }
+  }
+
+  async function handleSeedVotes() {
+    if (!user) return;
+    setSeeding(true);
+    setError('');
+    setSeedResult(null);
+    try {
+      const r = await base44.galleryAdmin.seedVotes({ min: 0, max: 50 });
+      setSeedResult(r);
+      // Trigger gallery refresh for clients
+      try { window.dispatchEvent(new CustomEvent('gallery:refresh')); } catch {}
+    } catch (e) {
+      setError(e?.message || 'Seed votes failed');
+    } finally {
+      setSeeding(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!user || !deleteSrc) return;
+    setDeleting(true);
+    setError('');
+    try {
+      // Accept either the direct storage URL or a viewer URL with ?src=...
+      let raw = deleteSrc.trim();
+      try {
+        const u = new URL(raw, window.location.origin);
+        const maybeSrc = u.searchParams.get('src');
+        if (maybeSrc) {
+          raw = decodeURIComponent(maybeSrc);
+        }
+      } catch {
+        // ignore parse errors, treat as raw URL
+      }
+      await base44.galleryAdmin.delete({ src: raw });
+      setDeleteSrc('');
+      try { window.dispatchEvent(new CustomEvent('gallery:refresh')); } catch {}
+    } catch (e) {
+      setError(e?.message || 'Delete failed');
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  async function handleAssignRand() {
+    if (!user) return;
+    setAssigningRand(true);
+    setError('');
+    setAssignResult(null);
+    try {
+      const r = await base44.galleryAdmin.assignRand();
+      setAssignResult(r);
+      try { window.dispatchEvent(new CustomEvent('gallery:refresh')); } catch {}
+    } catch (e) {
+      setError(e?.message || 'Assign rand failed');
+    } finally {
+      setAssigningRand(false);
+    }
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
@@ -194,6 +276,67 @@ export default function Admin() {
             <pre className="text-xs bg-slate-50 border border-slate-200 rounded-lg p-3 overflow-x-auto">
 {JSON.stringify(diagnostics, null, 2)}
             </pre>
+          ) : null}
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-3">
+          <div className="font-semibold text-slate-900">Gallery maintenance</div>
+          <div className="text-xs text-slate-500">Register recent generated images into the community gallery.</div>
+          <button
+            type="button"
+            onClick={handleGalleryBackfill}
+            disabled={galleryBackfilling}
+            className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          >
+            {galleryBackfilling ? 'Registering…' : 'Backfill from generated (scan 200)'}
+          </button>
+          {galleryBackfillResult ? (
+            <span className="text-xs text-slate-500">Scanned {galleryBackfillResult.scanned} • Registered {galleryBackfillResult.created}</span>
+          ) : null}
+          <div className="pt-3" />
+          <div className="text-xs text-slate-500">Seed random votes in range 0–50 for all gallery items.</div>
+          <button
+            type="button"
+            onClick={handleSeedVotes}
+            disabled={seeding}
+            className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          >
+            {seeding ? 'Seeding…' : 'Seed votes (0–50)'}
+          </button>
+          {seedResult ? (
+            <span className="text-xs text-slate-500">Updated {seedResult.updated} items</span>
+          ) : null}
+          <div className="pt-4" />
+          <div className="text-xs text-slate-500 mb-1">Remove a specific gallery image by URL</div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={deleteSrc}
+              onChange={(e) => setDeleteSrc(e.target.value)}
+              placeholder="Paste exact image URL"
+              className="w-full px-3 py-1.5 text-sm rounded-lg border border-slate-200"
+            />
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting || !deleteSrc.trim()}
+              className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-red-700 hover:bg-red-50 disabled:opacity-60"
+            >
+              {deleting ? 'Removing…' : 'Remove'}
+            </button>
+          </div>
+          <div className="pt-4" />
+          <div className="text-xs text-slate-500">Assign random keys to gallery docs missing them (for fair marquee selection).</div>
+          <button
+            type="button"
+            onClick={handleAssignRand}
+            disabled={assigningRand}
+            className="mt-1 px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          >
+            {assigningRand ? 'Assigning…' : 'Assign random keys'}
+          </button>
+          {assignResult ? (
+            <span className="ml-2 text-xs text-slate-500">Updated {assignResult.updated}</span>
           ) : null}
         </div>
 

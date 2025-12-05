@@ -20,6 +20,30 @@ export const API_BASE = (() => {
   return `https://${trimmed}`;
 })();
 
+async function fetchWithApiBase(path, init = {}) {
+  const tryFetch = async (base) => fetch(`${base}${path}`, init);
+  let res = null;
+  try {
+    res = await tryFetch(API_BASE);
+  } catch {
+    res = null;
+  }
+  if (!res || (res.status === 404 && API_BASE === '')) {
+    try {
+      const fallbackBase =
+        (typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost')
+          ? 'http://localhost:8787'
+          : (import.meta.env.VITE_API_BASE_FALLBACK || '');
+      if (fallbackBase) {
+        res = await tryFetch(fallbackBase);
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return res;
+}
+
 async function getIdTokenOrThrow() {
   const user = auth.currentUser;
   if (!user) throw new Error('Not authenticated');
@@ -280,6 +304,128 @@ export const base44 = {
         let details = '';
         try { details = await res.text(); } catch {}
         throw new Error(`Diagnostics failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    }
+  },
+  galleryAdmin: {
+    async backfill({ limit = 200 } = {}) {
+      // Try Express route
+      let res = await authFetch(`/api/admin/gallery/backfill?limit=${encodeURIComponent(limit)}`, { method: 'POST' });
+      if (res.status === 404) {
+        // Fallback to Azure Function
+        res = await authFetch(`/api/gallery/backfill?limit=${encodeURIComponent(limit)}`, { method: 'POST' });
+      }
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Gallery backfill failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    },
+    async seedVotes({ min = 100, max = 500 } = {}) {
+      // Defaults changed to 0–50
+      if (min === 100 && max === 500) {
+        min = 0; max = 50;
+      }
+      const qs = new URLSearchParams();
+      if (min != null) qs.set('min', String(min));
+      if (max != null) qs.set('max', String(max));
+      // Try Express route
+      let res = await authFetch(`/api/admin/gallery/seed-votes?${qs.toString()}`, { method: 'POST' });
+      if (res.status === 404) {
+        // Fallback to Azure Function
+        res = await authFetch(`/api/gallery/seed-votes?${qs.toString()}`, { method: 'POST' });
+      }
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Seed votes failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    },
+    async assignRand() {
+      // Try Express route
+      let res = await authFetch(`/api/admin/gallery/assign-rand`, { method: 'POST' });
+      if (res.status === 404) {
+        // Fallback to Azure Function
+        res = await authFetch(`/api/gallery/assign-rand`, { method: 'POST' });
+      }
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Assign rand failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    },
+    async delete({ id, src } = {}) {
+      const payload = {};
+      if (id) payload.id = id;
+      if (src) payload.src = src;
+      // Try Express
+      let res = await authFetch(`/api/admin/gallery/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.status === 404) {
+        // Azure Function
+        res = await authFetch(`/api/gallery/delete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Delete gallery item failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    }
+  },
+  gallery: {
+    async top(limit = 20) {
+      const res = await fetchWithApiBase(`/api/gallery/top?limit=${encodeURIComponent(limit)}`, { method: 'GET', cache: 'no-store' });
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Get top gallery failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    },
+    async random(limit = 20) {
+      // Try Express first
+      let res = await fetchWithApiBase(`/api/gallery/random?limit=${encodeURIComponent(limit)}`, { method: 'GET', cache: 'no-store' });
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Get random gallery failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    },
+    async getVotes(ids = []) {
+      if (!Array.isArray(ids) || ids.length === 0) return { votes: {}, userVotes: {} };
+      const qs = new URLSearchParams();
+      ids.forEach((id) => qs.append('ids', id));
+      let res = await authFetch(`/api/gallery/votes?${qs.toString()}`, { method: 'GET' });
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Get votes failed (${res.status})${details ? `: ${details}` : ''}`);
+      }
+      return await res.json();
+    },
+    async vote(id) {
+      const res = await authFetch(`/api/gallery/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (!res.ok) {
+        let details = '';
+        try { details = await res.text(); } catch {}
+        throw new Error(`Vote failed (${res.status})${details ? `: ${details}` : ''}`);
       }
       return await res.json();
     }

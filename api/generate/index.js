@@ -135,6 +135,26 @@ module.exports = async function (context, req) {
       created_date: new Date().toISOString(),
     };
     await ref.set(doc);
+    // Register in gallery index
+    try {
+      const rawId = `generated:${ref.id}`;
+      const nid = (() => {
+        try { return Buffer.from(String(rawId)).toString('base64url'); }
+        catch { return Buffer.from(String(rawId)).toString('base64').replace(/[+/=]/g, '_'); }
+      })();
+      await db.collection('gallery').doc(nid).set({
+        id: rawId,
+        nid,
+        image_url: finalImageUrl,
+        prompt: prompt || null,
+        votes: 0,
+        rand: Math.random(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { merge: true });
+    } catch (e) {
+      // silent fail; generation still succeeds
+    }
     context.res = { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: ref.id, ...doc }) };
   } catch (e) {
     context.res = {
