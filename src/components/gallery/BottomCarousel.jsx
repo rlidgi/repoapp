@@ -115,7 +115,7 @@ export default function BottomCarousel() {
           className="flex gap-6 py-5 pb-10 marquee-track"
           style={{
             width: 'max-content',
-            '--marquee-duration': images.length > 0 ? `${Math.max(20, images.length * 0.8)}s` : '20s',
+            '--marquee-duration': images.length > 0 ? `${Math.max(29, images.length * 1.15)}s` : '29s',
           }}
           ref={trackRef}
         >
