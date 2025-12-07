@@ -95,6 +95,12 @@ export default function BottomCarousel() {
           animation-name: marquee-scroll;
           animation-timing-function: linear;
           animation-iteration-count: infinite;
+          animation-duration: var(--marquee-duration);
+        }
+        @media (max-width: 768px) {
+          .marquee-track {
+            animation-duration: calc(var(--marquee-duration) * 2);
+          }
         }
         .marquee:hover .marquee-track {
           animation-play-state: paused;
@@ -109,7 +115,7 @@ export default function BottomCarousel() {
           className="flex gap-6 py-5 pb-10 marquee-track"
           style={{
             width: 'max-content',
-            animationDuration: images.length > 0 ? `${Math.max(20, images.length * 0.8)}s` : '20s',
+            '--marquee-duration': images.length > 0 ? `${Math.max(20, images.length * 0.8)}s` : '20s',
           }}
           ref={trackRef}
         >
