@@ -18,8 +18,6 @@ import BottomCarousel from '@/components/gallery/BottomCarousel';
 
 
 
-
-
 export default function Home() {
   const siteUrl = import.meta.env.VITE_SITE_URL || (window.location && window.location.origin) || '';
   useSEO({
