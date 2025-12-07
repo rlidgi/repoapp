@@ -32,7 +32,7 @@ if (!fs.existsSync(distDir)) {
 const siteUrl =
   process.env.SITE_URL ||
   process.env.VITE_SITE_URL ||
-  'http://localhost:5173';
+  'https://piclumo.com';
 
 const routes = ['/', '/gallery', '/pricing', '/privacy', '/terms'];
 const today = new Date().toISOString().slice(0, 10);

@@ -52,7 +52,7 @@ export function useSEO(config) {
 		const siteName = 'Piclumo';
 		const siteUrl =
 			(import.meta.env.VITE_SITE_URL && String(import.meta.env.VITE_SITE_URL)) ||
-			(window.location && window.location.origin) ||
+			(import.meta.env.PROD ? 'https://piclumo.com' : (window.location && window.location.origin)) ||
 			'';
 		const pathname = config?.path || (location && location.pathname) || '/';
 		const fullUrl = `${siteUrl}${pathname}`;
