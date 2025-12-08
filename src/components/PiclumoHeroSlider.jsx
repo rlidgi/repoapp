@@ -26,7 +26,7 @@ const PiclumoHeroSlider = () => {
     useEffect(() => {
         const id = setInterval(() => {
             setIndex((prev) => (prev + 1) % heroImages.length);
-        }, 1500); // 1.5 seconds per image
+        }, 2000); // 1.5 seconds per image
         return () => clearInterval(id);
     }, []);
 

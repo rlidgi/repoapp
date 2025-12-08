@@ -143,53 +143,53 @@ export default function Layout({ children }) {
         {children}
       </main>
 
-		{/* Footer */}
-		<footer className="border-t border-slate-200 bg-white">
-			<div className="max-w-7xl mx-auto px-6 py-10 grid gap-8 md:grid-cols-3">
-				<div>
-					<div className="flex items-center gap-3 mb-3">
-						<img
-							src="/logo.png"
-							alt="Piclumo"
-							className="h-8 md:h-10 object-contain"
-							loading="lazy"
-						/>
-						<span className="text-base font-semibold text-slate-900">Piclumo</span>
-					</div>
-					<p className="text-sm text-slate-600">Create stunning AI images from prompts or full articles.</p>
-				</div>
-				<nav className="text-sm">
-					<div className="font-semibold text-slate-900 mb-3">Explore</div>
-					<ul className="space-y-2 text-slate-600">
-						<li><Link to={createPageUrl('Home')} className="hover:text-slate-900">Create</Link></li>
-						<li><Link to={createPageUrl('Gallery')} className="hover:text-slate-900">Gallery</Link></li>
-						<li><Link to={createPageUrl('Pricing')} className="hover:text-slate-900">Pricing</Link></li>
-						<li><Link to={createPageUrl('Privacy')} className="hover:text-slate-900">Privacy</Link></li>
-						<li><Link to={createPageUrl('Terms')} className="hover:text-slate-900">Terms</Link></li>
-					</ul>
-				</nav>
-				<div className="text-sm text-slate-600">
-					<div className="font-semibold text-slate-900 mb-3">Get started</div>
-					<p>It’s free to try. No credit card required.</p>
-				</div>
-			</div>
-			<div className="border-t border-slate-100">
-				<div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between text-xs text-slate-500">
-					<span>© {new Date().getFullYear()} Piclumo. All rights reserved.</span>
-					<div className="flex items-center gap-4">
-						<a
-							href="https://www.facebook.com/profile.php?id=61584415657720"
-							target="_blank"
-							rel="noreferrer"
-							aria-label="Piclumo on Facebook"
-							className="hover:text-slate-700"
-						>
-							<Facebook className="w-4 h-4" />
-						</a>
-					</div>
-				</div>
-			</div>
-		</footer>
+      {/* Footer */}
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="max-w-7xl mx-auto px-6 py-10 grid gap-8 md:grid-cols-3">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <img
+                src="/logo.png"
+                alt="Piclumo"
+                className="h-8 md:h-10 object-contain"
+                loading="lazy"
+              />
+              <span className="text-base font-semibold text-slate-900">Piclumo</span>
+            </div>
+            <p className="text-sm text-slate-600">Create stunning AI images from prompts or full articles.</p>
+          </div>
+          <nav className="text-sm">
+            <div className="font-semibold text-slate-900 mb-3">Explore</div>
+            <ul className="space-y-2 text-slate-600">
+              <li><Link to={createPageUrl('Home')} className="hover:text-slate-900">Create</Link></li>
+              <li><Link to={createPageUrl('Gallery')} className="hover:text-slate-900">Gallery</Link></li>
+              <li><Link to={createPageUrl('Pricing')} className="hover:text-slate-900">Pricing</Link></li>
+              <li><Link to={createPageUrl('Privacy')} className="hover:text-slate-900">Privacy</Link></li>
+              <li><Link to={createPageUrl('Terms')} className="hover:text-slate-900">Terms</Link></li>
+            </ul>
+          </nav>
+          <div className="text-sm text-slate-600">
+            <div className="font-semibold text-slate-900 mb-3">Get started</div>
+            <p>It’s free to try. No credit card required.</p>
+          </div>
+        </div>
+        <div className="border-t border-slate-100">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between text-xs text-slate-500">
+            <span>© {new Date().getFullYear()} Piclumo. All rights reserved.</span>
+            <div className="flex items-center gap-4">
+              <a
+                href="https://www.facebook.com/profile.php?id=61584415657720"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Piclumo on Facebook"
+                className="hover:text-slate-700"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       <Toaster
         position="bottom-right"

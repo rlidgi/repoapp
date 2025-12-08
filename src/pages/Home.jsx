@@ -18,7 +18,6 @@ import BottomCarousel from '@/components/gallery/BottomCarousel';
 
 
 
-
 import PiclumoHeroSlider from '@/components/PiclumoHeroSlider';
 
 <div>
