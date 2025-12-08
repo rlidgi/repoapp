@@ -54,7 +54,9 @@ body {
 @media (max-width: 768px) {
   .hero-slider__image {
     /* On mobile, center horizontally so main subject isn't cropped off one side */
-    object-position: 50% 50%;
+    object-position: center;
+    object-fit: cover;
+    width: 100vw;
   }
 }
 
