@@ -117,7 +117,7 @@ export default function TopGallery() {
     const onRefresh = () => reload({ silent: true });
     window.addEventListener('gallery:refresh', onRefresh);
     return () => {
-      try { typeof cleanup === 'function' && cleanup(); } catch {}
+      try { typeof cleanup === 'function' && cleanup(); } catch { }
       window.removeEventListener('gallery:refresh', onRefresh);
     };
   }, [reload]);
@@ -141,7 +141,7 @@ export default function TopGallery() {
         // Ignore silent vote refresh errors
       }
     })();
-  }, [user, items]); 
+  }, [user, items]);
 
   const openViewer = useCallback((item) => {
     const url = `/gallery/viewer?src=${encodeURIComponent(item.src)}&prompt=${encodeURIComponent(item.prompt || '')}`;
@@ -193,7 +193,7 @@ export default function TopGallery() {
     <div className="mb-12">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-slate-900">Community Favorites</h2>
-        <div className="text-sm text-slate-500">Top 20 by votes</div>
+        <div className="text-sm text-slate-500">Top 4 by votes</div>
       </div>
       <div className="grid gap-6 grid-cols-2">
         {sortedTop.map((it) => {
