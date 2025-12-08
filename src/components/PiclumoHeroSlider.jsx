@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 const heroImages = [
     {
-        src: "/images/garden.png",
+        src: "/images/garden.webp",
         label: "Fantasy landscapes",
     },
     {
@@ -10,11 +10,11 @@ const heroImages = [
         label: "Photorealistic Digital Art",
     },
     {
-        src: "/images/castle.png",
+        src: "/images/castle.webp",
         label: "Medieval fantasy",
     },
     {
-        src: "/images/space.png",
+        src: "/images/space.webp",
         label: "Cinematic concept art"
     }
 ];

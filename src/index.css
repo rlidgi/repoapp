@@ -19,6 +19,12 @@ body {
   color: #f1f5f9;
 }
 
+@media (max-width: 768px) {
+  .hero-slider {
+    height: 100vh;
+  }
+}
+
 /* Each slide is full-screen and stacked on top of each other */
 .hero-slider__slide {
   position: absolute;
