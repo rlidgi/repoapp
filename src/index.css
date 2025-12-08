@@ -21,7 +21,8 @@ body {
 
 @media (max-width: 768px) {
   .hero-slider {
-    height: 100vh;
+    height: 60vh;
+    /* Reduced height on mobile to minimize cropping of landscape images */
   }
 }
 
