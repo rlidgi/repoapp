@@ -29,21 +29,41 @@ export default function Layout({ children }) {
     }
   }, [user, showLoginModal]);
 
+  const isHome = location.pathname === createPageUrl('Home') || location.pathname === '/';
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const transparentHeader = isHome && !isScrolled;
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col overflow-x-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
+      <header className={cn(
+        "fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300",
+        transparentHeader
+          ? "bg-transparent border-white/10"
+          : "bg-white/80 backdrop-blur-xl border-slate-100 shadow-sm"
+      )}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-28">
+          <div className="flex items-center justify-between h-[70px]">
             {/* Logo */}
             <Link
               to={createPageUrl('Home')}
               className="flex items-center gap-3 group"
             >
               <img
-                src="/logo.png"
+                src="/logotop.png"
                 alt="Piclumo"
-                className="h-24 md:h-28 object-contain"
+                className={cn(
+                  "h-[80px] object-contain drop-shadow-md transition-all -my-2"
+                )}
                 loading="lazy"
               />
             </Link>
@@ -57,9 +77,12 @@ export default function Layout({ children }) {
                     to={createPageUrl(item.name)}
                     className={cn(
                       "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                      transparentHeader
+                        ? "text-white/90 hover:text-white hover:bg-white/10"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50",
                       isActive(item.name)
-                        ? "bg-slate-100 text-slate-900"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                        ? (transparentHeader ? "bg-white/20 text-white" : "bg-slate-100 text-slate-900")
+                        : ""
                     )}
                   >
                     {item.icon ? <item.icon className="w-4 h-4" /> : null}
@@ -70,22 +93,27 @@ export default function Layout({ children }) {
               <div className="flex items-center gap-3">
                 {user ? (
                   <>
-                    <div className="flex items-center gap-2">
+                    <div className={cn("flex items-center gap-2", transparentHeader ? "text-white/90" : "text-slate-700")}>
                       {user.picture && (
                         <img
                           src={user.picture}
                           alt={user.name || 'User'}
-                          className="w-8 h-8 rounded-full"
+                          className={cn("w-8 h-8 rounded-full", transparentHeader ? "border border-white/20" : "")}
                           referrerPolicy="no-referrer"
                         />
                       )}
-                      <span className="text-sm text-slate-700 max-w-[12rem] truncate">
+                      <span className="text-sm max-w-[12rem] truncate drop-shadow-sm">
                         {user.name || user.email}
                       </span>
                     </div>
                     <button
                       onClick={signOut}
-                      className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                      className={cn(
+                        "px-3 py-1.5 text-sm rounded-lg border transition-colors",
+                        transparentHeader
+                          ? "border-white/20 text-white/90 hover:bg-white/10 hover:text-white"
+                          : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                      )}
                     >
                       Sign out
                     </button>
@@ -93,7 +121,12 @@ export default function Layout({ children }) {
                 ) : (
                   <button
                     onClick={() => setShowLoginModal(true)}
-                    className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                    className={cn(
+                      "px-3 py-1.5 text-sm rounded-lg border transition-colors",
+                      transparentHeader
+                        ? "border-white/20 text-white/90 hover:bg-white/10 hover:text-white"
+                        : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                    )}
                   >
                     Sign in
                   </button>
