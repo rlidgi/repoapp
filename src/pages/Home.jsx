@@ -16,6 +16,7 @@ import { Brush, Shield, ImageIcon } from 'lucide-react';
 import TopGallery from '@/components/gallery/TopGallery';
 import BottomCarousel from '@/components/gallery/BottomCarousel';
 
+
 import PiclumoHeroSlider from '@/components/PiclumoHeroSlider';
 
 <div>

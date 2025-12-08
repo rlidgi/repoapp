@@ -10,8 +10,8 @@ const heroImages = [
         label: "Photorealistic Digital Art",
     },
     {
-        src: "/images/person.png",
-        label: "Artistic portraits",
+        src: "/images/castle.png",
+        label: "Medieval fantasy",
     },
     {
         src: "/images/space.png",
