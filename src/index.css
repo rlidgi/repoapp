@@ -47,7 +47,15 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   filter: saturate(1.1);
+}
+
+@media (max-width: 768px) {
+  .hero-slider__image {
+    /* On mobile, center horizontally so main subject isn't cropped off one side */
+    object-position: 50% 50%;
+  }
 }
 
 /* Dark gradient on left for text */
