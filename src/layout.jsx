@@ -182,9 +182,9 @@ export default function Layout({ children }) {
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Piclumo on Facebook"
-                className="hover:text-slate-700"
+                className="opacity-80 hover:opacity-100 transition-opacity"
               >
-                <Facebook className="w-4 h-4" />
+                <img src="/facebook.svg" alt="Facebook" className="w-6 h-6" />
               </a>
             </div>
           </div>
