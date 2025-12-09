@@ -202,6 +202,8 @@ export default function Admin() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
         <div className="max-w-4xl mx-auto px-6 py-12">
+          {/* Google Adsense exclusion for this page to avoid 'Low Value Content' */}
+          <style>{`.adsbygoogle { display: none !important; }`}</style>
           <div className="p-4 rounded-xl border border-slate-200 bg-white text-sm text-slate-700">
             Please sign in to view the admin dashboard.
           </div>
@@ -214,6 +216,8 @@ export default function Admin() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
         <div className="max-w-4xl mx-auto px-6 py-12">
+          {/* Google Adsense exclusion for this page */}
+          <style>{`.adsbygoogle { display: none !important; }`}</style>
           <div className="p-4 rounded-xl border border-slate-200 bg-white text-sm text-slate-700">
             You are not authorized to view this page.
           </div>

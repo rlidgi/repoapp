@@ -53,6 +53,10 @@ export default function Pricing() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-slate-900">Choose your plan</h1>
           <p className="text-slate-600 mt-2">Start free. Upgrade when you need more.</p>
+          <p className="text-sm text-slate-500 max-w-2xl mx-auto mt-4">
+            We offer transparent pricing with no hidden fees. All paid plans include priority support, higher usage limits, and access to advanced generation features.
+            Whether you are a hobbyist or a professional, Piclumo scales with your needs. Create hundreds of high-quality AI images without breaking the bank.
+          </p>
           <div className="flex items-center justify-center gap-3 flex-wrap mt-6">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 bg-white">
               <Shield className="w-4 h-4 text-emerald-600" />
@@ -123,6 +127,27 @@ export default function Pricing() {
               </div>
             );
           })}
+        </div>
+        <div className="mt-16 border-t border-slate-200 pt-12">
+          <h3 className="text-xl font-semibold text-slate-900 mb-6 text-center">Frequently Asked Questions</h3>
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div>
+              <h4 className="font-medium text-slate-900 mb-2">Can I cancel anytime?</h4>
+              <p className="text-sm text-slate-600">Yes, you can cancel your subscription at any time. Your access will continue until the end of your billing period.</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-slate-900 mb-2">What happens to my images?</h4>
+              <p className="text-sm text-slate-600">You retain full ownership of all images you generate. Images are privately stored in your gallery unless you choose to share them.</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-slate-900 mb-2">Is there a free trial?</h4>
+              <p className="text-sm text-slate-600">We offer a generous free tier that resets daily, so you can try Piclumo risk-free before upgrading.</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-slate-900 mb-2">Do you offer refunds?</h4>
+              <p className="text-sm text-slate-600">If you are unsatisfied with your purchase, please contact support within 7 days for a refund inquiry.</p>
+            </div>
+          </div>
         </div>
       </div>
       <LoginPromptModal open={showLogin} onClose={() => setShowLogin(false)} />

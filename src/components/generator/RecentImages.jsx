@@ -34,6 +34,7 @@ export default function RecentImages({ images, isLoading, error }) {
   }
 
   if (!images || images.length === 0) {
+    if (!user) return null;
     return (
       <div className="mt-16">
         <div className="text-center py-16 px-8 bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-3xl">
@@ -41,11 +42,7 @@ export default function RecentImages({ images, isLoading, error }) {
             <ImageIcon className="w-8 h-8 text-slate-400" />
           </div>
           <h3 className="text-lg font-medium text-slate-700 mb-2">No images yet</h3>
-          {user ? (
           <p className="text-slate-500 text-sm">Your generated images will appear here</p>
-          ) : (
-            <p className="text-slate-500 text-sm">Sign in to see your recent creations</p>
-          )}
         </div>
       </div>
     );
