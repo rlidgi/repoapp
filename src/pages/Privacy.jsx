@@ -26,7 +26,7 @@ export default function Privacy() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
-      <div className="max-w-3xl mx-auto px-6 py-12">
+      <div className="max-w-3xl mx-auto px-6 pt-24 pb-12">
         {error ? (
           <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-sm text-red-700 break-all">
             {error}. Place your Termly HTML at public/privacy.html

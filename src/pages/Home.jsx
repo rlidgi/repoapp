@@ -194,6 +194,7 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
 
           {/* Mode Toggle */}
           <motion.div
+            id="create-section"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}

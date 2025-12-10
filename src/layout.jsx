@@ -14,7 +14,7 @@ export default function Layout({ children }) {
 
   const navItems = [
     { name: 'Home', icon: Plus, label: 'Create' },
-    ...(user ? [{ name: 'Gallery', icon: Images, label: 'My images' }] : []),
+    { name: 'Gallery', icon: Images, label: 'My Creations' },
     { name: 'Pricing', icon: null, label: 'Pricing' },
   ];
 
@@ -75,6 +75,16 @@ export default function Layout({ children }) {
                   <Link
                     key={item.name}
                     to={createPageUrl(item.name)}
+                    onClick={(e) => {
+                      // If clicking "Create" while already on home page, scroll to create section
+                      if (item.name === 'Home' && isHome) {
+                        e.preventDefault();
+                        const createSection = document.getElementById('create-section');
+                        if (createSection) {
+                          createSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                      }
+                    }}
                     className={cn(
                       "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
                       transparentHeader

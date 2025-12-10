@@ -201,7 +201,7 @@ export default function Admin() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
-        <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto px-6 pt-24 pb-12">
           {/* Google Adsense exclusion for this page to avoid 'Low Value Content' */}
           <style>{`.adsbygoogle { display: none !important; }`}</style>
           <div className="p-4 rounded-xl border border-slate-200 bg-white text-sm text-slate-700">
@@ -215,7 +215,7 @@ export default function Admin() {
   if (!user.email || user.email.toLowerCase() !== ownerEmail.toLowerCase()) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
-        <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto px-6 pt-24 pb-12">
           {/* Google Adsense exclusion for this page */}
           <style>{`.adsbygoogle { display: none !important; }`}</style>
           <div className="p-4 rounded-xl border border-slate-200 bg-white text-sm text-slate-700">
@@ -228,7 +228,7 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
-      <div className="max-w-6xl mx-auto px-6 py-12 space-y-8">
+      <div className="max-w-6xl mx-auto px-6 pt-24 pb-12 space-y-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
           <p className="text-sm text-slate-600 mt-1">User metrics and recent registrations.</p>
