@@ -112,7 +112,6 @@ export default function PromptInput({ value, onChange, onGenerate, isLoading, mo
             {ex}
           </button>
         ))}
-        <span className="ml-auto text-xs text-slate-500">{counts} • Press Ctrl/⌘+Enter</span>
       </div>
 
       <Button
@@ -135,37 +134,6 @@ export default function PromptInput({ value, onChange, onGenerate, isLoading, mo
           </>
         )}
       </Button>
-
-      {/* Recent history */}
-      {history.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs text-slate-500">Recent:</span>
-          {history.map((h, i) => (
-            <button
-              type="button"
-              key={i}
-              onClick={() => onChange(h)}
-              className="text-xs px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
-              title={h}
-            >
-              {h.length > 42 ? h.slice(0, 42) + '…' : h}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => {
-              setHistory([]);
-              try {
-                const key = mode === 'article' ? 'articleHistory' : 'promptHistory';
-                localStorage.removeItem(key);
-              } catch {}
-            }}
-            className="ml-auto text-xs text-slate-500 hover:text-slate-700 underline"
-          >
-            Clear
-          </button>
-        </div>
-      )}
     </div>
   );
 }

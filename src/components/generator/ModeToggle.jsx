@@ -28,7 +28,7 @@ export default function ModeToggle({ mode, setMode }) {
           )}
         >
           <FileText className="w-4 h-4" />
-          <span>Article</span>
+          <span>Article mode</span>
         </button>
 
         {/* Sliding background */}

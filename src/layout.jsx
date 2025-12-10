@@ -14,7 +14,7 @@ export default function Layout({ children }) {
 
   const navItems = [
     { name: 'Home', icon: Plus, label: 'Create' },
-    { name: 'Gallery', icon: Images, label: 'Gallery' },
+    ...(user ? [{ name: 'Gallery', icon: Images, label: 'My images' }] : []),
     { name: 'Pricing', icon: null, label: 'Pricing' },
   ];
 
