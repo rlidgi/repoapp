@@ -165,6 +165,15 @@ export default function Layout({ children }) {
                 loading="lazy"
               />
               <span className="text-base font-semibold text-slate-900">Piclumo</span>
+              <a
+                href="https://www.facebook.com/profile.php?id=61584415657720"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Piclumo on Facebook"
+                className="opacity-80 hover:opacity-100 transition-opacity ml-2"
+              >
+                <img src="/facebook.svg" alt="Facebook" className="w-5 h-5" />
+              </a>
             </div>
             <p className="text-sm text-slate-600">Create stunning AI images from prompts or full articles.</p>
           </div>
@@ -186,17 +195,6 @@ export default function Layout({ children }) {
         <div className="border-t border-slate-100">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between text-xs text-slate-500">
             <span>© {new Date().getFullYear()} Piclumo. All rights reserved.</span>
-            <div className="flex items-center gap-4">
-              <a
-                href="https://www.facebook.com/profile.php?id=61584415657720"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Piclumo on Facebook"
-                className="opacity-80 hover:opacity-100 transition-opacity"
-              >
-                <img src="/facebook.svg" alt="Facebook" className="w-6 h-6" />
-              </a>
-            </div>
           </div>
         </div>
       </footer>
