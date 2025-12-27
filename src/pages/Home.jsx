@@ -190,7 +190,7 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
             </p>
           </motion.div>
 
-          {/* Hero visual removed per request to place logo above AI badge */}
+          {/* Hero visual removed per request to place logo bove AI badge */}
 
           {/* Mode Toggle */}
           <motion.div
@@ -269,9 +269,6 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
             </motion.div>
           </AnimatePresence>
 
-          {/* Community Top Gallery */}
-          <TopGallery />
-
           {/* Generated Images */}
           <AnimatePresence>
             {generatedImages.length > 0 && (
@@ -291,6 +288,9 @@ Create prompts that capture key themes, scenes, or concepts from the article.`,
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Community Top Gallery */}
+          <TopGallery />
 
           {/* Recent Images */}
           <RecentImages images={recentImages} isLoading={loadingRecent} error={recentError} />
